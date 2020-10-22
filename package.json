@@ -1,0 +1,17 @@
+{
+    "name": "electronjs",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "electron": "^10.1.2"
+    },
+    "dependencies": {
+        "sweetalert2": "^10.7.0"
+    }
+}
