@@ -4,9 +4,41 @@
     display: none;
 }
 
-.main {
-    display: flex;
+#paynet-webview {
+    width: 100%;
+    height: 100vh;
+    display: none;
+}
+
+#paynet-webview {
+    width: 100%;
+    height: 100vh;
+    /* display: none; */
+}
+
+#status-report {
+    display: none;
     justify-content: center;
     align-items: center;
-    height: 700px;
+    width: 50%;
+    padding: 1rem;
+    position: absolute;
+    top: 10%;
+    border: solid 1px black;
+    background-color: white;
+    border-radius: 30px;
+    text-align: center;
+}
+
+#status-report span {
+    font-weight: bold;
+    font-size: 18px;
+}
+.main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    min-height: 100vh;
 }

@@ -12,6 +12,7 @@
 
 <body>
     <div class="main">
+        <div id="status-report"></div>
         <div id="form-container" class="max-w-xs items-center justify-center">
             <form class="">
                 <div class="mb-4">
@@ -49,12 +50,14 @@
         </div>
         <webview preload="./assets/js/runt-preload.js" id="runt-webview" src="https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"></webview>
 
+        <webview preload="./assets/js/paynet-preload.js" id="paynet-webview" src="https://indra.paynet.com.co:14443/login.aspx"></webview>
+
     </div>
 
     <script>
         window.$ = window.jQuery = require('./assets/js/jquery-3.5.1.min.js');
     </script>
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/renderer.js"></script>
 </body>
 
 </html>
