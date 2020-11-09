@@ -6,7 +6,6 @@
     "scripts": {
         "start": "electron .",
         "package-win": "electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32  --prune=true --out=release-builds --version-string.CompanyName=Movers --version-string.FileDescription=Runt-Integration --version-string.ProductName=\"Runt Integration\""
-
     },
     "author": "",
     "license": "ISC",

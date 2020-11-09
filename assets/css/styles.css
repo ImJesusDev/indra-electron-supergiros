@@ -9,7 +9,15 @@
     height: 100vh;
     display: none;
 }
+#settings-btn {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+}
 
+#settings-btn img {
+   width: 40px;
+}
 #paynet-webview {
     width: 100%;
     height: 100vh;
