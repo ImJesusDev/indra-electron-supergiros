@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title> Runt </title>
+    <title> INDRA </title>
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <link rel="stylesheet" href="assets/css/styles.css" />
@@ -20,10 +20,19 @@
                         Tipo de Vehiculo
                     </label>
                     <div class="inline-block relative w-64">
-                        <select class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="1">Tipo 1</option>
-                            <option value="2">Tipo 2</option>
-                            <option value="3">Tipo 3</option>
+                        <select id="vehicle-type-select" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="MOTOCICLETA">MOTOCICLETA</option>
+                            <option value="LIVIANOS PARTICULARES">LIVIANOS PARTICULARES</option>
+                            <option value="PESADOS 2 EJES PARTICULARES">PESADOS 2 EJES PARTICULARES</option>
+                            <option value="MOTOCARROS">MOTOCARROS</option>
+                            <option value="LIVIANOS PUBLICOS">LIVIANOS PUBLICOS</option>
+                            <option value="PESADOS 3 O MAS EJES PARTICULARES">PESADOS 3 O MAS EJES PARTICULARES</option>
+                            <option value="PESADOS BIARTICULADOS PARTICULARES">PESADOS BIARTICULADOS PARTICULARES</option>
+                            <option value="PESADOS BIARTICULADOS PUBLICOS">PESADOS BIARTICULADOS PUBLICOS</option>
+                            <option value="PESADOS 3 O MAS EJES PUBLICOS">PESADOS 3 O MAS EJES PUBLICOS</option>
+                            <option value="PESADOS 2 EJES PUBLICOS">PESADOS 2 EJES PUBLICOS</option>
+                            <option value="MOTOCARROS LIVIANOS PARTICULARES">MOTOCARROS LIVIANOS PARTICULARES</option>
+                            <option value="MOTOCARROS LIVIANOS PUBLICOS">MOTOCARROS LIVIANOS PUBLICOS</option>
                          </select>
                     </div>
                 </div>

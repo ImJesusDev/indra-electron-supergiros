@@ -5,12 +5,30 @@ const Swal = require('sweetalert2')
 function goToRunt() {
     $('#form-container').hide();
     $('#runt-webview').show();
+    /* Store the value of the selected vehicle type */
+    const vehicleType = $('#vehicle-type-select');
+    localStorage.setItem('vehicle-type', vehicleType.val());
 };
 
 const runtWebview = document.getElementById('runt-webview');
 const paynetWebview = document.getElementById('paynet-webview');
 
-const checkPaynetCredentials = async () => {
+const sendVehicleData = async() => {
+    const documentType = localStorage.getItem('document-type');
+    const plate = localStorage.getItem('plate');
+    const documentNumber = localStorage.getItem('document-number');
+    const model = localStorage.getItem('vehicle-model');
+    const vehicleType = localStorage.getItem('vehicle-type');
+    paynetWebview.send('vehicleData', {
+        documentNumber: documentNumber,
+        plate: plate,
+        documentType: documentType,
+        model: model,
+        vehicleType: vehicleType
+    });
+};
+
+const checkPaynetCredentials = async() => {
     let credentials = localStorage.getItem('paynet-credentials');
     if (!credentials) {
         const { value: formValues } = await Swal.fire({
@@ -43,46 +61,74 @@ const checkPaynetCredentials = async () => {
         if (formValues && formValues.username && formValues.password) {
             localStorage.setItem('paynet-credentials', JSON.stringify(formValues));
             paynetWebview.send('paynetCredentials', formValues);
+            sendVehicleData();
         }
     } else {
         paynetWebview.send('paynetCredentials', JSON.parse(credentials));
+        sendVehicleData();
     }
 
 };
 
 
-setTimeout(async () => {
+setTimeout(async() => {
     // runtWebview.openDevTools();
     // paynetWebview.openDevTools();
 }, 500);
 
+ipc.on('runtFormData', (event, props) => {
+    localStorage.setItem('document-type', props.documentType);
+    localStorage.setItem('plate', props.plate);
+    localStorage.setItem('document-number', props.documentNumber);
+});
+ipc.on('paynetLogin', (event, props) => {
+    $('#status-report').html('');
+    var statusContent = '<span>Iniciando Sesión!</span>';
+    $('#status-report').append(statusContent);
+
+});
+
+ipc.on('pinRedirect', (event, props) => {
+    $('#status-report').html('');
+    var statusContent = '<span>Redireccionado a compra de PIN</span>';
+    $('#status-report').append(statusContent);
+
+});
+ipc.on('loadingPinInfo', (event, props) => {
+    $('#status-report').html('');
+    var statusContent = '<span>Ingresando información</span>';
+    $('#status-report').append(statusContent);
+    setTimeout(() => {
+        $('#status-report').hide();
+    }, 600);
+
+});
+
 ipc.on('vehicleData', (event, props) => {
-    $('#status-report').hide('');
+    $('#status-report').show();
     $('#status-report').html('');
     if (props.type === 'vehicleInfo') {
-        var statusContent = '<span>Recibiendo Informacion del Vehiculo!</span>';
-        $('#status-report').show();
+        var statusContent = '<span>Consultando Informacion del Vehiculo!</span>';
+        localStorage.setItem('vehicle-model', props.data.model);
         $('#status-report').append(statusContent);
-        setTimeout(() => {
-            $('#status-report').hide();
-        }, 2500);
     }
     if (props.type === 'otherInfo') {
-        var statusContent = '<span>Recibiendo Informacion Adicional!</span>';
-        $('#status-report').show();
+        $('#status-report').html('');
+        var statusContent = '<span>Consultando Informacion Adicional!</span>';
         $('#status-report').append(statusContent);
-        setTimeout(() => {
-            $('#status-report').hide();
-        }, 2500);
     }
 
     if (props.type === 'done') {
-        setTimeout(async () => {
+        $('#status-report').html('');
+        var statusContent = '<span>Información obtenida, realizando redirección a Paynet</span>';
+        $('#status-report').append(statusContent);
+        setTimeout(async() => {
             $('#runt-webview').hide();
             $('#paynet-webview').show();
             runtWebview.send('newRequest', true);
             await checkPaynetCredentials();
-        }, 3000);
+            await sendVehicleData();
+        }, 2000);
     }
 
 

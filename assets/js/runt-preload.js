@@ -1,32 +1,52 @@
 const { ipcRenderer: ipc } = require('electron');
 
 
-ipc.on('newRequest', async (event, props) => {
+ipc.on('newRequest', async(event, props) => {
     await newRequest();
 });
 /* Add listener for when the content is loaded */
-document.addEventListener('DOMContentLoaded', async (event) => {
+document.addEventListener('DOMContentLoaded', async(event) => {
     /* Add timeout to prevent errors (button not rendered) */
-    setTimeout(async () => {
+    setTimeout(async() => {
 
         /* Plate input */
-        let plate = $('#noPlaca');
-        plate.val('HKQ558');
-        plate.trigger('input');
+        // let plateInput = $('#noPlaca');
+        // plateInput.val('HKQ558');
+        // plateInput.trigger('input');
 
         /* Document number input */
-        let documentNumber = $('input[name ="noDocumento"]');
-        documentNumber.val('51914792');
-        documentNumber.trigger('input');
+        // let documentNumberInput = $('input[name ="noDocumento"]');
+        // documentNumberInput.val('51914792');
+        // documentNumberInput.trigger('input');
 
         /* Find button to make the request for vehicle information */
         let xpath = "//button[text()='Consultar Información']";
+
         let matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 
         /* Add Event on click for the button */
-        matchingElement.addEventListener("click", async () => {
+        matchingElement.addEventListener("click", async() => {
+            /* Store the selected values of the form */
+            const form = document.getElementsByName('consultaAutomotorFrm');
+            const documentTypeValue = form[0].childNodes[11].childNodes[3].childNodes[3].value;
+
+            const plate = $('#noPlaca');
+
+
+            const documentNumber = $('input[name ="noDocumento"]');
+
+
+            const formData = {
+                documentNumber: documentNumber.val(),
+                plate: plate.val(),
+                documentType: documentTypeValue
+            };
+
+            ipc.sendTo(1, 'runtFormData', formData);
+
+
             /* Add timeout after the button is clicked */
-            setTimeout(async () => {
+            setTimeout(async() => {
                 let theMake = await getVehicleMake();
                 let theModel = await getVehicleModel();
                 let theLine = await getVehicleLine();
@@ -58,12 +78,13 @@ document.addEventListener('DOMContentLoaded', async (event) => {
 }, false);
 
 
-const sendData = async (type, data) => {
+const sendData = async(type, data) => {
     const dataToSend = {
         type: type,
         data: data
     };
     ipc.sendTo(1, 'vehicleData', dataToSend);
+
     // setTimeout(() => {
     //     const vehicleData = {
 
@@ -76,7 +97,7 @@ const sendData = async (type, data) => {
 };
 
 
-const getVehicleMake = async () => {
+const getVehicleMake = async() => {
     /* Get the Make of the vehicle */
     let makeXpath = "//label[text()='Marca:']";
     let matchingMakeElement = document.evaluate(makeXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -85,7 +106,7 @@ const getVehicleMake = async () => {
     return vehicleMake.trim();
 };
 
-const getVehicleModel = async () => {
+const getVehicleModel = async() => {
     /* Get the Model of the vehicle */
     let modelXpath = "//label[text()='Modelo:']";
     let matchingModelElement = document.evaluate(modelXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -94,7 +115,7 @@ const getVehicleModel = async () => {
     return vehicleModel.trim();
 };
 
-const getVehicleLine = async () => {
+const getVehicleLine = async() => {
 
     /* Get the Line of the vehicle */
     let lineXpath = "//label[text()='Línea:']";
@@ -104,7 +125,7 @@ const getVehicleLine = async () => {
     return vehicleLine.trim();
 };
 
-const getVehicleColor = async () => {
+const getVehicleColor = async() => {
 
     /* Get the Color of the vehicle */
     let colorXpath = "//label[text()='Color:']";
@@ -114,7 +135,7 @@ const getVehicleColor = async () => {
     return vehicleColor.trim();
 };
 
-const getSoatInfo = async () => {
+const getSoatInfo = async() => {
     return new Promise((resolve) => {
         /* Soat */
         let soatTabXpath = "//a[text()=' Poliza SOAT']";
@@ -131,7 +152,7 @@ const getSoatInfo = async () => {
     });
 };
 
-const getVehicleState = async () => {
+const getVehicleState = async() => {
     /* Get the state of the vehicle */
     let stateXpath = "//label[text()='Estado del vehículo:']";
     let matchingStateElement = document.evaluate(stateXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -140,7 +161,7 @@ const getVehicleState = async () => {
     return vehicleState.trim();
 };
 
-const getRequestInfo = async () => {
+const getRequestInfo = async() => {
     return new Promise((resolve) => {
         /*  Requests */
         let requestsTabXpath = "//a[text()=' Solicitudes']";
@@ -162,7 +183,7 @@ const getRequestInfo = async () => {
     });
 };
 
-const newRequest = async () => {
+const newRequest = async() => {
     /*  Click the button to make another search */
     let newSearchXpath = "//button[text()='Realizar otra consulta']";
     let newSearchButton = document.evaluate(newSearchXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
