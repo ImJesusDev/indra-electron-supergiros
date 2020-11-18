@@ -8,6 +8,7 @@
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/tailwind.min.css" />
+
 </head>
 
 <body>
@@ -36,32 +37,35 @@
             <div class="login-form">
                 <form class="">
                     <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                        <label class="block text-gray-700 text-sm font-bold " for="username">
                             Usuario SICOV
                         </label>
-                        <input onkeyup="sicovInputChange()"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            id="sicov-username" type="text" placeholder="Usuario SICOV">
-
+                        <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sicov-username" type="text" placeholder="Usuario SICOV">
                     </div>
                     <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                        <label class="block text-gray-700 text-sm font-bold " for="password">
                             Password SICOV
                         </label>
-                        <input onkeyup="sicovInputChange()"
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                            id="sicov-password" type="password" placeholder="Password SICOV">
+                        <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sicov-password" type="password" placeholder="Password SICOV">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold " for="username">
+                            Usuario Paynet
+                        </label>
+                        <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="paynet-username" type="text" placeholder="Usuario Paynet">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold " for="password">
+                            Password Paynet
+                        </label>
+                        <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="paynet-password" type="password" placeholder="Password Paynet">
                     </div>
 
                     <div class="flex items-center justify-between">
-                        <button id="sicov-btn-enabled" onclick="showForm()"
-                            class="bg-blue-500  hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            type="button">
+                        <button id="sicov-btn-enabled" onclick="showForm()" class="bg-blue-500  hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
                             Iniciar Sesión
                         </button>
-                        <button disabled id="sicov-btn-disabled"
-                            class="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed"
-                            type="button">
+                        <button disabled id="sicov-btn-disabled" class="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed" type="button">
                             Iniciar Sesión
                         </button>
 
@@ -72,20 +76,42 @@
 
         <div id="form-container" class="max-w-xs items-center justify-center">
             <div class="settings">
-                <button id="settings-btn" type="button"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    onclick="openSettings()">
+                <button id="settings-btn" type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="openSettings()">
                     <img src="assets/images//settings.svg" alt="Ajustos">
                 </button>
             </div>
             <form class="">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                        Tipo de documento
+                    </label>
+                    <div class="inline-block relative w-64">
+                        <select id="document-type" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="1">Cedula Ciudadanía</option>
+                            <option value="2">Tipo 2</option>
+                            <option value="3">Tipo 3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold " for="document-number">
+                        Número de Documento
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="document-number" type="text" placeholder="Número de documento">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold " for="vehicle-plate">
+                        Placa del Vehículo
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="vehicle-plate" type="text" placeholder="Placa">
+                </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
                         Tipo de Vehiculo
                     </label>
                     <div class="inline-block relative w-64">
-                        <select id="vehicle-type-select"
-                            class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+                        <select id="vehicle-type-select" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
                             <option value="MOTOCICLETA">MOTOCICLETA</option>
                             <option value="LIVIANOS PARTICULARES">LIVIANOS PARTICULARES</option>
                             <option value="PESADOS 2 EJES PARTICULARES">PESADOS 2 EJES PARTICULARES</option>
@@ -107,8 +133,7 @@
                         Tipo de revision
                     </label>
                     <div class="inline-block relative w-64">
-                        <select
-                            class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+                        <select class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
                             <option value="1">Tipo 1</option>
                             <option value="2">Tipo 2</option>
                             <option value="3">Tipo 3</option>
@@ -116,9 +141,7 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-between">
-                    <button onclick="goToRunt()"
-                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        type="button">
+                    <button onclick="goToRunt()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
                         Consultar
                     </button>
 
@@ -126,19 +149,15 @@
             </form>
 
         </div>
-        <webview preload="./assets/js/runt-preload.js" id="runt-webview"
-            src="https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"></webview>
+        <webview preload="./assets/js/runt-preload.js" id="runt-webview" src="https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"></webview>
 
-        <webview preload="./assets/js/paynet-preload.js" id="paynet-webview"
-            src="https://indra.paynet.com.co:14443/login.aspx"></webview>
+        <webview preload="./assets/js/paynet-preload.js" id="paynet-webview" src="https://indra.paynet.com.co:14443/login.aspx"></webview>
         <div id="notification" class="hidden">
             <p id="message"></p>
-            <button id="close-button" onClick="closeNotification()"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            <button id="close-button" onClick="closeNotification()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                 Cerrar
             </button>
-            <button id="restart-button" onClick="restartApp()"
-                class="bg-blue-500 hidden hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            <button id="restart-button" onClick="restartApp()" class="bg-blue-500 hidden hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                 Reiniciar
             </button>
         </div>
@@ -150,7 +169,9 @@
     </script>
     <script src="assets/js/renderer.js"></script>
     <script>
-        const { ipcRenderer } = require('electron');
+        const {
+            ipcRenderer
+        } = require('electron');
 
         const notification = document.getElementById('notification');
         const message = document.getElementById('message');
@@ -170,6 +191,7 @@
         function closeNotification() {
             notification.classList.add('hidden');
         }
+
         function restartApp() {
             ipcRenderer.send('restart_app');
         }

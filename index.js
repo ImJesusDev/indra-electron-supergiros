@@ -15,13 +15,13 @@ function createWindow() {
 
     win.loadFile('index.html');
     win.maximize();
-    win.removeMenu();
+    // win.removeMenu();
     win.show();
 
     // win.webContents.openDevTools()
-       
-  
-    
+
+
+
 
     //HKQ558
     //51914792
@@ -57,4 +57,3 @@ autoUpdater.on('update-downloaded', () => {
 ipcMain.on('restart_app', () => {
     autoUpdater.quitAndInstall();
 });
-
