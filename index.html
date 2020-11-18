@@ -13,10 +13,65 @@
 <body>
     <div class="main">
         <div id="status-report"></div>
+
+       
+            <!-- Two columns -->
+            <div id="login-container">
+                <div class="login-img">
+                
+                    <div class="login-title">
+                        <div class="logo">
+                            <img src="./assets/images/minsait-dark.svg" alt="Minsait">
+                        </div>
+                        <div class="title">
+                            <h1>¡Bienvenidos a CDA! </h1>
+                        </div>
+                        <div class="description">
+                            <p>Centro de diagnóstico automotor
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="login-form"> 
+                    <form class="">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                                Usuario SICOV
+                            </label>
+                            <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sicov-username" type="text" placeholder="Usuario SICOV">
+
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                              Password SICOV
+                            </label>
+                            <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="sicov-password" type="password" placeholder="Password SICOV">
+                          </div>
+                      
+                        <div class="flex items-center justify-between">
+                            <button id="sicov-btn-enabled" onclick="showForm()"
+                                class="bg-blue-500  hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                type="button">
+                                Iniciar Sesión
+                            </button>
+                            <button  disabled id="sicov-btn-disabled"
+                                class="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed"
+                                type="button">
+                                Iniciar Sesión
+                            </button>
+        
+                        </div>
+                    </form>    
+                </div>
+            </div>
+        
         <div id="form-container" class="max-w-xs items-center justify-center">
             <div class="settings">
-                <button id="settings-btn" type="button"  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="openSettings()" >
-                <img src="assets/images//settings.svg" alt="Ajustos">
+                <button id="settings-btn" type="button"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    onclick="openSettings()">
+                    <img src="assets/images//settings.svg" alt="Ajustos">
                 </button>
             </div>
             <form class="">
@@ -25,46 +80,53 @@
                         Tipo de Vehiculo
                     </label>
                     <div class="inline-block relative w-64">
-                        <select id="vehicle-type-select" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+                        <select id="vehicle-type-select"
+                            class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
                             <option value="MOTOCICLETA">MOTOCICLETA</option>
                             <option value="LIVIANOS PARTICULARES">LIVIANOS PARTICULARES</option>
                             <option value="PESADOS 2 EJES PARTICULARES">PESADOS 2 EJES PARTICULARES</option>
                             <option value="MOTOCARROS">MOTOCARROS</option>
                             <option value="LIVIANOS PUBLICOS">LIVIANOS PUBLICOS</option>
                             <option value="PESADOS 3 O MAS EJES PARTICULARES">PESADOS 3 O MAS EJES PARTICULARES</option>
-                            <option value="PESADOS BIARTICULADOS PARTICULARES">PESADOS BIARTICULADOS PARTICULARES</option>
+                            <option value="PESADOS BIARTICULADOS PARTICULARES">PESADOS BIARTICULADOS PARTICULARES
+                            </option>
                             <option value="PESADOS BIARTICULADOS PUBLICOS">PESADOS BIARTICULADOS PUBLICOS</option>
                             <option value="PESADOS 3 O MAS EJES PUBLICOS">PESADOS 3 O MAS EJES PUBLICOS</option>
                             <option value="PESADOS 2 EJES PUBLICOS">PESADOS 2 EJES PUBLICOS</option>
                             <option value="MOTOCARROS LIVIANOS PARTICULARES">MOTOCARROS LIVIANOS PARTICULARES</option>
                             <option value="MOTOCARROS LIVIANOS PUBLICOS">MOTOCARROS LIVIANOS PUBLICOS</option>
-                         </select>
+                        </select>
                     </div>
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                  Tipo de revision
-                </label>
+                        Tipo de revision
+                    </label>
                     <div class="inline-block relative w-64">
-                        <select class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="1">Tipo 1</option>
-                        <option value="2">Tipo 2</option>
-                        <option value="3">Tipo 3</option>
-                  </select>
+                        <select
+                            class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="1">Tipo 1</option>
+                            <option value="2">Tipo 2</option>
+                            <option value="3">Tipo 3</option>
+                        </select>
                     </div>
                 </div>
                 <div class="flex items-center justify-between">
-                    <button onclick="goToRunt()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
-                  Consultar
-                </button>
+                    <button onclick="goToRunt()"
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        type="button">
+                        Consultar
+                    </button>
 
                 </div>
             </form>
 
         </div>
-        <webview preload="./assets/js/runt-preload.js" id="runt-webview" src="https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"></webview>
+        <webview preload="./assets/js/runt-preload.js" id="runt-webview"
+            src="https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"></webview>
 
-        <webview preload="./assets/js/paynet-preload.js" id="paynet-webview" src="https://indra.paynet.com.co:14443/login.aspx"></webview>
+        <webview preload="./assets/js/paynet-preload.js" id="paynet-webview"
+            src="https://indra.paynet.com.co:14443/login.aspx"></webview>
 
     </div>
 

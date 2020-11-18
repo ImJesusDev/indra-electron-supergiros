@@ -45,6 +45,25 @@ function goToRunt() {
     localStorage.setItem('vehicle-type', vehicleType.val());
 };
 
+function sicovInputChange() {
+    const sicovUsername = $('#sicov-username');
+    const sicovPassword = $('#sicov-password');
+    if(sicovUsername.val() && sicovPassword.val()) {
+        $('#sicov-btn-disabled').hide();
+        $('#sicov-btn-enabled').show();
+    }
+}
+
+function showForm() {
+    $('#login-container').hide();
+    $('#form-container').show();
+    /* Store the value of the selected vehicle type */
+    const sicovUsername = $('#sicov-username');
+    const sicovPassword = $('#sicov-password');
+    localStorage.setItem('sicov-username', sicovUsername.val());
+    localStorage.setItem('sicov-password', sicovPassword.val());
+};
+
 const runtWebview = document.getElementById('runt-webview');
 const paynetWebview = document.getElementById('paynet-webview');
 
