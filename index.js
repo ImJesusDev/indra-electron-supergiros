@@ -1,35 +1,60 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
+const { autoUpdater } = require('electron-updater');
+
+let win;
 
 function createWindow() {
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
         show: false,
         frame: true,
         webPreferences: {
             nodeIntegration: true,
             webviewTag: true,
         }
-    })
+    });
 
     win.loadFile('index.html');
     win.maximize();
-    // win.removeMenu();
+    win.removeMenu();
     win.show();
 
     // win.webContents.openDevTools()
+       
+  
+    
 
     //HKQ558
     //51914792
 }
-app.whenReady().then(createWindow)
+
+
+app.whenReady().then(createWindow).then(() => {
+    console.log('Checking for updates');
+    autoUpdater.checkForUpdatesAndNotify();
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit()
     }
-})
+});
 
 app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
         createWindow()
     }
-})
+});
+
+autoUpdater.on('update-available', () => {
+    console.log('update-available');
+    win.webContents.send('update_available');
+});
+autoUpdater.on('update-downloaded', () => {
+    console.log('update downloaded');
+    win.webContents.send('update_downloaded');
+});
+
+ipcMain.on('restart_app', () => {
+    autoUpdater.quitAndInstall();
+});
+
