@@ -7,60 +7,99 @@
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/material.min.css" />
     <link rel="stylesheet" href="assets/css/tailwind.min.css" />
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-yellow.min.css" /> -->
 
 </head>
 
 <body>
+    <!-- Main Content Container -->
     <div class="main">
+
+        <!-- Display Status of current Operation -->
         <div id="status-report"></div>
+        <!-- Display Status of current Operation -->
 
-
-        <!-- Two columns -->
+        <!-- Login Page Container -->
         <div id="login-container">
+
+            <!-- Left Background Image -->
             <div class="login-img">
 
-                <div class="login-title">
+                <!-- Left Side Content -->
+                <div class="login-content">
+
+                    <!-- Logo -->
                     <div class="logo">
                         <img src="./assets/images/minsait-dark.svg" alt="Minsait">
                     </div>
+                    <!-- Logo -->
+
+                    <!-- Title -->
                     <div class="title">
                         <h1>¡Bienvenidos a CDA! </h1>
                     </div>
+                    <!-- Title -->
+
+                    <!-- Description -->
                     <div class="description">
                         <p>Centro de diagnóstico automotor
                         </p>
                     </div>
+                    <!-- Description -->
+
                 </div>
+                <!-- Left Side Content -->
 
             </div>
+            <!-- Left Background Image -->
+
+            <!-- Login Form -->
             <div class="login-form">
-                <form class="">
+
+                <!-- Form -->
+                <form>
+
+                    <!-- Sicov User -->
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold " for="username">
                             Usuario SICOV
                         </label>
                         <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sicov-username" type="text" placeholder="Usuario SICOV">
                     </div>
+                    <!-- Sicov User -->
+
+                    <!-- Sicov Password -->
                     <div class="mb-6">
                         <label class="block text-gray-700 text-sm font-bold " for="password">
                             Password SICOV
                         </label>
                         <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sicov-password" type="password" placeholder="Password SICOV">
                     </div>
+                    <!-- Sicov Password -->
+
+                    <!-- Paynet User -->
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold " for="username">
                             Usuario Paynet
                         </label>
                         <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="paynet-username" type="text" placeholder="Usuario Paynet">
                     </div>
+                    <!-- Paynet User -->
+
+                    <!-- Paynet Password -->
                     <div class="mb-6">
                         <label class="block text-gray-700 text-sm font-bold " for="password">
                             Password Paynet
                         </label>
                         <input onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="paynet-password" type="password" placeholder="Password Paynet">
                     </div>
+                    <!-- Paynet User -->
 
+                    <!--Buttons -->
                     <div class="flex items-center justify-between">
                         <button id="sicov-btn-enabled" onclick="showForm()" class="bg-blue-500  hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
                             Iniciar Sesión
@@ -68,16 +107,147 @@
                         <button disabled id="sicov-btn-disabled" class="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed" type="button">
                             Iniciar Sesión
                         </button>
+                    </div>
+                    <!--Buttons -->
+
+                </form>
+                <!-- Form -->
+
+            </div>
+            <!-- Login Form -->
+
+        </div>
+        <!-- Login Page Container -->
+
+        <!-- Initial Form Container -->
+        <div id="form-container" class="max-w-xs items-center justify-center">
+
+            <div class="heading">
+                <div class="header">
+                    <div class="header-logo">
+                        <img src="assets/images/minsait-dark.svg" alt="Minsait">
+                    </div>
+                    <div class="header-user">
+                        jesus@mail.com
+                    </div>
+                </div>
+                <div class="navbar">
+                    <div class="navbar-item"> Iniciar revisión </div>
+                    <div class="navbar-item"> Revisiones fallidas </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="container">
+                <div class="wrapper">
+                    <div class="arrow-steps clearfix">
+                        <div id="initial-step" class="step current"> <span>Iniciar revisión</span> </div>
+                        <div id="runt-step" class="step"> <span>RUNT</span> </div>
+                        <div id="paynet-step" class="step"> <span> Paynet</span> </div>
+                        <div id="sicov-step" class="step"> <span>SICOV</span> </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Progress Bar -->
+            <div id="initial-form" class="initial-form">
+
+                <form class="">
+                    <div class="form-title">
+                        <h1>Iniciar Revisión</h1>
+                    </div>
+
+                    <div>
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input onkeyup="initialFormChange()" value="HKQ558" class="mdl-textfield__input" type="text" id="vehicle-plate">
+                            <label class="mdl-textfield__label" for="vehicle-plate">Placa del vehículo</label>
+                        </div>
+                    </div>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <select onchange="initialFormChange()" class="mdl-textfield__input" id="document-type" name="document-type">
+                          <option value="">Tipo de documento</option>
+                          <option value="D">Carnet Diplomático</option>
+                          <option value="C">Cédula Ciudadanía</option>
+                          <option value="E">Cédula de Extranjería</option>
+                          <option value="N">NIT</option>
+                          <option value="P">Pasaporte</option>
+                          <option value="U">Registro Civil</option>
+                          <option value="T">Tarjeta de Identidad </option>
+                        </select>
+                        <!-- <label class="mdl-textfield__label" for="document-type">Tipo de documento</label> -->
+                    </div>
+                    <div>
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input value="51914792" onkeyup="initialFormChange()" class="mdl-textfield__input" type="text" id="document-number">
+                            <label class="mdl-textfield__label" for="document-number">Número de documento</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input value="3217584129" onkeyup="initialFormChange()" class="mdl-textfield__input" type="text" id="cellphone">
+                            <label class="mdl-textfield__label" for="cellphone">Celular</label>
+                        </div>
+                    </div>
+
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <select onchange="initialFormChange()" class="mdl-textfield__input" id="revision-type" name="revision-type">
+                          <option value="">Tipo de Revisión</option>
+                          <option value="Inicial">Revisión inicial</option>
+                        </select>
+                        <!-- <label class="mdl-textfield__label" for="revision-type">Tipo de Revisión</label> -->
+                    </div> <br>
+                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                        <select onchange="initialFormChange()" class="mdl-textfield__input" id="vehicle-type-select" name="vehicle-type-select">
+                            <option value="">Tipo de Vehículo</option>
+                            <option value="MOTOCICLETA">MOTOCICLETA</option>
+                            <option value="LIVIANOS PARTICULARES">LIVIANOS PARTICULARES</option>
+                            <option value="PESADOS 2 EJES PARTICULARES">PESADOS 2 EJES PARTICULARES</option>
+                            <option value="MOTOCARROS">MOTOCARROS</option>
+                            <option value="LIVIANOS PUBLICOS">LIVIANOS PUBLICOS</option>
+                            <option value="PESADOS 3 O MAS EJES PARTICULARES">PESADOS 3 O MAS EJES PARTICULARES</option>
+                            <option value="PESADOS BIARTICULADOS PARTICULARES">PESADOS BIARTICULADOS PARTICULARES
+                            </option>
+                            <option value="PESADOS BIARTICULADOS PUBLICOS">PESADOS BIARTICULADOS PUBLICOS</option>
+                            <option value="PESADOS 3 O MAS EJES PUBLICOS">PESADOS 3 O MAS EJES PUBLICOS</option>
+                            <option value="PESADOS 2 EJES PUBLICOS">PESADOS 2 EJES PUBLICOS</option>
+                            <option value="MOTOCARROS LIVIANOS PARTICULARES">MOTOCARROS LIVIANOS PARTICULARES</option>
+                            <option value="MOTOCARROS LIVIANOS PUBLICOS">MOTOCARROS LIVIANOS PUBLICOS</option>s
+                        </select>
+                        <!-- <label class="mdl-textfield__label" for="document-type">Tipo de documento</label> -->
+                    </div>
+
+
+
+
+
+
+                    <div class="flex mt-5 items-center justify-center">
+
+                        <img onclick="goToRunt()" id="continue-img" width="80px" src="assets/images/success.svg" alt="Continuar">
+                        <img id="continue-disabled" width="80px" src="assets/images/success-disabled.svg" alt="Continuar">
 
                     </div>
                 </form>
             </div>
-        </div>
+            <!-- Runt Webview -->
+            <webview preload="./assets/js/runt-preload.js" id="runt-webview" src="https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"></webview>
+            <!-- Runt Webview -->
 
-        <div id="form-container" class="max-w-xs items-center justify-center">
-            <div class="settings">
+            <!-- Paynet Webview -->
+            <webview preload="./assets/js/paynet-preload.js" id="paynet-webview" src="https://indra.paynet.com.co:14443/login.aspx"></webview>
+            <!-- Paynet Webview -->
+
+            <div class="footer">
+                <div class="footer-logo">
+                    <img src="assets/images/minsait-white.svg" alt="Minsait">
+                </div>
+            </div>
+
+
+
+            <!-- <div class="settings">
                 <button id="settings-btn" type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="openSettings()">
-                    <img src="assets/images//settings.svg" alt="Ajustos">
+                    <img src="assets/images/settings.svg" alt="Ajustes">
                 </button>
             </div>
             <form class="">
@@ -87,7 +257,7 @@
                     </label>
                     <div class="inline-block relative w-64">
                         <select id="document-type" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="1">Cedula Ciudadanía</option>
+                            <option value="1">CED</option>
                             <option value="2">Tipo 2</option>
                             <option value="3">Tipo 3</option>
                         </select>
@@ -146,12 +316,14 @@
                     </button>
 
                 </div>
-            </form>
+            </form> -->
 
         </div>
-        <webview preload="./assets/js/runt-preload.js" id="runt-webview" src="https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"></webview>
+        <!-- Initial Form Container -->
 
-        <webview preload="./assets/js/paynet-preload.js" id="paynet-webview" src="https://indra.paynet.com.co:14443/login.aspx"></webview>
+
+
+        <!-- Update Notification -->
         <div id="notification" class="hidden">
             <p id="message"></p>
             <button id="close-button" onClick="closeNotification()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
@@ -161,26 +333,48 @@
                 Reiniciar
             </button>
         </div>
+        <!-- Update Notification -->
+
 
     </div>
+    <!-- Main Content Container -->
 
+
+    <!-- 
+        ###################################
+        INCLUDE SCRIPTS
+        ###################################
+     -->
+
+    <!-- JQUERY -->
     <script>
         window.$ = window.jQuery = require('./assets/js/jquery-3.5.1.min.js');
     </script>
+
+    <!-- Main Renderer -->
     <script src="assets/js/renderer.js"></script>
+
+    <!-- Steps -->
+    <script src="assets/js/progress-bar.js"></script>
+
+    <!-- Material Design -->
+    <script src="assets/js/material.min.js"></script>
+
+    <!-- Manage Updated -->
     <script>
         const {
             ipcRenderer
         } = require('electron');
-
         const notification = document.getElementById('notification');
         const message = document.getElementById('message');
         const restartButton = document.getElementById('restart-button');
+
         ipcRenderer.on('update_available', () => {
             ipcRenderer.removeAllListeners('update_available');
             message.innerText = 'Descargando nueva actualización...';
             notification.classList.remove('hidden');
         });
+
         ipcRenderer.on('update_downloaded', () => {
             ipcRenderer.removeAllListeners('update_downloaded');
             message.innerText = 'Actualización descargada, será instalada luego de reiniciar. ¿Reiniciar ahora?';
@@ -196,6 +390,7 @@
             ipcRenderer.send('restart_app');
         }
     </script>
+
 </body>
 
 </html>

@@ -3,11 +3,25 @@ const path = require('path')
 
 
 ipc.on('paynetCredentials', async(event, props) => {
-    ipc.sendTo(1, 'paynetLogin', true);
-    // window.$ = window.jQuery = require(path.join(__dirname, '/jquery-3.5.1.min.js'));
-    await setUsername(props.username);
-    await setPassword(props.password);
-    await login();
+    if (window.location.href === 'https://indra.paynet.com.co:14443/login.aspx') {
+        ipc.sendTo(1, 'paynetLogin', true);
+        // window.$ = window.jQuery = require(path.join(__dirname, '/jquery-3.5.1.min.js'));
+        await setUsername(props.username);
+        await setPassword(props.password);
+        await login();
+    }
+    if (window.location.href === 'https://indra.paynet.com.co:14443/InformacionSeguridad.aspx') {
+        ipc.sendTo(1, 'pinRedirect', true);
+        await setTimeout(async() => {
+            await navigateToPing();
+        }, 1000);
+    }
+    if (window.location.href === 'https://indra.paynet.com.co:14443/PIN/VentaPin.aspx') {
+        await setTimeout(async() => {
+            ipc.sendTo(1, 'loadingPinInfo', true);
+            await inputData();
+        }, 1000);
+    }
 
 });
 
@@ -17,6 +31,7 @@ ipc.on('vehicleData', async(event, props) => {
     localStorage.setItem('documentType', props.documentType);
     localStorage.setItem('vehicleModel', props.model);
     localStorage.setItem('vehicleType', props.vehicleType);
+    localStorage.setItem('cellphone', props.cellphone);
 });
 /* Add listener for when the content is loaded */
 document.addEventListener('DOMContentLoaded', async(event) => {
@@ -58,12 +73,14 @@ const inputData = async() => {
     const documentNumber = localStorage.getItem('documentNumber');
     const documentType = localStorage.getItem('documentType');
     const vehicleType = localStorage.getItem('vehicleType');
+    const cellphone = localStorage.getItem('cellphone');
 
     await setModel(vehicleModel);
     await setPlate(vehiclePlate);
     await setPlateConfirmation(vehiclePlate);
     await setDocument(documentNumber);
     await setDocumentType(documentType);
+    await setCellphone(cellphone);
     // await setPhone('456');
     // await setMobile('789');
     await setService(vehicleType);
@@ -171,6 +188,10 @@ const setDocumentType = async(documentType) => {
 const setModel = async(model) => {
     const modelInput = $('#ctl00_cph_txtModelo');
     modelInput.val(model);
+};
+const setCellphone = async(cellphone) => {
+    const cellphoneInput = $('#ctl00_cph_txtCelular');
+    cellphoneInput.val(cellphone);
 };
 
 const setPhone = async(phone) => {
