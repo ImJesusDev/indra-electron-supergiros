@@ -2,7 +2,7 @@ const { ipcRenderer: ipc } = require('electron');
 const path = require('path')
 
 
-ipc.on('paynetCredentials', async(event, props) => {
+ipc.on('paynetCredentials', async (event, props) => {
     if (window.location.href === 'https://indra.paynet.com.co:14443/login.aspx') {
         ipc.sendTo(1, 'paynetLogin', true);
         // window.$ = window.jQuery = require(path.join(__dirname, '/jquery-3.5.1.min.js'));
@@ -12,12 +12,12 @@ ipc.on('paynetCredentials', async(event, props) => {
     }
     if (window.location.href === 'https://indra.paynet.com.co:14443/InformacionSeguridad.aspx') {
         ipc.sendTo(1, 'pinRedirect', true);
-        await setTimeout(async() => {
+        await setTimeout(async () => {
             await navigateToPing();
         }, 1000);
     }
     if (window.location.href === 'https://indra.paynet.com.co:14443/PIN/VentaPin.aspx') {
-        await setTimeout(async() => {
+        await setTimeout(async () => {
             ipc.sendTo(1, 'loadingPinInfo', true);
             await inputData();
         }, 1000);
@@ -25,7 +25,7 @@ ipc.on('paynetCredentials', async(event, props) => {
 
 });
 
-ipc.on('vehicleData', async(event, props) => {
+ipc.on('vehicleData', async (event, props) => {
     localStorage.setItem('vehiclePlate', props.plate);
     localStorage.setItem('documentNumber', props.documentNumber);
     localStorage.setItem('documentType', props.documentType);
@@ -33,26 +33,29 @@ ipc.on('vehicleData', async(event, props) => {
     localStorage.setItem('vehicleType', props.vehicleType);
     localStorage.setItem('cellphone', props.cellphone);
 });
+
 /* Add listener for when the content is loaded */
-document.addEventListener('DOMContentLoaded', async(event) => {
+document.addEventListener('DOMContentLoaded', async (event) => {
 
     window.$ = window.jQuery = require(path.join(__dirname, '/jquery-1.11.1.min.js'));
     if (window.location.href === 'https://indra.paynet.com.co:14443/InformacionSeguridad.aspx') {
         ipc.sendTo(1, 'pinRedirect', true);
-        await setTimeout(async() => {
+        await setTimeout(async () => {
             await navigateToPing();
         }, 1000);
     }
     if (window.location.href === 'https://indra.paynet.com.co:14443/PIN/VentaPin.aspx') {
-        await setTimeout(async() => {
+        await setTimeout(async () => {
             ipc.sendTo(1, 'loadingPinInfo', true);
             await inputData();
+            // await setListeners();
         }, 1000);
     }
 
 }, false);
 
-const navigateToPing = async() => {
+
+const navigateToPing = async () => {
     setTimeout(() => {
         xpath = "//a[contains(text(),'Compra PIN')]";
         matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -61,12 +64,12 @@ const navigateToPing = async() => {
 
 };
 
-const setUsername = async(username) => {
+const setUsername = async (username) => {
     const usernameInput = $('#ctl00_cph_StormLogin_UserName');
     usernameInput.val(username);
 };
 
-const inputData = async() => {
+const inputData = async () => {
 
     const vehicleModel = localStorage.getItem('vehicleModel');
     const vehiclePlate = localStorage.getItem('vehiclePlate');
@@ -82,18 +85,20 @@ const inputData = async() => {
     await setDocumentType(documentType);
     await setCellphone(cellphone);
     // await setPhone('456');
-    // await setMobile('789');
     await setService(vehicleType);
     setTimeout(() => {
         const continueBtn = document.getElementById('ctl00_cph_btnSiguiente');
         continueBtn.addEventListener('click', () => {
-            // Handle logic after press button to continue
+            console.log('heeere');
+            ipc.sendTo(1, 'pinCreated', {
+                'pin': '13169211542003303803145'
+            });
         });
     }, 2000);
 
 };
 
-const getPinInfo = async() => {
+const getPinInfo = async () => {
     // Get the <th> tag 
     let xpath = "//th[text()='PIN']";
     let matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -111,12 +116,12 @@ const getPinInfo = async() => {
 
 };
 
-const setPlate = async(plate) => {
+const setPlate = async (plate) => {
     const plateInput = $('#ctl00_cph_txtPlaca');
     plateInput.val(plate);
 };
 
-const setService = async(service) => {
+const setService = async (service) => {
     let optionInput;
     switch (service) {
         case 'MOTOCICLETA':
@@ -172,43 +177,39 @@ const setService = async(service) => {
     }
 };
 
-const setPlateConfirmation = async(plate) => {
+const setPlateConfirmation = async (plate) => {
     const plateInput = $('#ctl00_cph_txtConfirmacionPlaca');
     plateInput.val(plate);
 };
-const setDocument = async(document) => {
+const setDocument = async (document) => {
     const documentInput = $('#ctl00_cph_txtNumeroCedula');
     documentInput.val(document);
 };
-const setDocumentType = async(documentType) => {
+const setDocumentType = async (documentType) => {
     const documentTypeInput = $('#ctl00_cph_ddlTipoIdentificacion');
     documentTypeInput.val(documentType);
 };
 
-const setModel = async(model) => {
+const setModel = async (model) => {
     const modelInput = $('#ctl00_cph_txtModelo');
     modelInput.val(model);
 };
-const setCellphone = async(cellphone) => {
+const setCellphone = async (cellphone) => {
     const cellphoneInput = $('#ctl00_cph_txtCelular');
     cellphoneInput.val(cellphone);
 };
 
-const setPhone = async(phone) => {
+const setPhone = async (phone) => {
     const phoneInput = $('#ctl00_cph_txtTelefono');
     phoneInput.val(phone);
 };
-const setMobile = async(mobile) => {
-    const mobileInput = $('#ctl00_cph_txtCelular');
-    mobileInput.val(mobile);
-};
 
-const setPassword = async(password) => {
+const setPassword = async (password) => {
     const passwordInput = $('#ctl00_cph_StormLogin_Password');
     passwordInput.val(password);
 };
 
-const login = async() => {
+const login = async () => {
     const loginBtn = $('#ctl00_cph_StormLogin_LoginButton');
     const rememberInput = document.getElementById('ctl00_cph_StormLogin_RememberMe');
     rememberInput.checked = true;

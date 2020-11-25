@@ -6,6 +6,42 @@ const Swal = require('sweetalert2');
 const runtWebview = document.getElementById('runt-webview');
 /* Paynet */
 const paynetWebview = document.getElementById('paynet-webview');
+/* Sicre */
+const sicreWebview = document.getElementById('sicre-webview');
+
+let currentSicreState;
+
+/* Capture navigation events */
+sicreWebview.addEventListener('did-stop-loading', (event) => {
+    if (currentSicreState == 'enter-plate') {
+        const plate = localStorage.getItem('plate');
+        const revisionType = localStorage.getItem('revision-type');
+        const vehicleType = localStorage.getItem('vehicle-type');
+        const documentNumber = localStorage.getItem('document-number');
+        const data = {
+            'plate': plate,
+            'revisionType': revisionType,
+            'vehicleType': vehicleType,
+            'documentNumber': documentNumber,
+            'pinNumber': '123456'
+        };
+        sicreWebview.send('enter-plate', data);
+        currentSicreState = 'plate-entered';
+    }
+});
+
+sicreWebview.addEventListener('did-navigate', (event) => {
+    console.log('did-navigate', event.url);
+    /* If the url is the sucursal selection */
+    if (event.url.indexOf('SeleccionarSucursal') >= 0) {
+        sicreWebview.send('sucursal-selection', true);
+    }
+    if (event.url.indexOf('FormalizacionRevision') >= 0) {
+        if (currentSicreState !== 'plate-entered') {
+            currentSicreState = 'enter-plate';
+        }
+    }
+});
 
 async function openSettings() {
 
@@ -73,7 +109,9 @@ function goToRunt() {
 function sicovInputChange() {
     const sicovUsername = $('#sicov-username');
     const sicovPassword = $('#sicov-password');
-    if (sicovUsername.val() && sicovPassword.val()) {
+    const paynetUsername = $('#paynet-username');
+    const paynetPassword = $('#paynet-password');
+    if (sicovUsername.val() && sicovPassword.val() && paynetUsername.val() && paynetPassword.val()) {
         $('#sicov-btn-disabled').hide();
         $('#sicov-btn-enabled').show();
     }
@@ -112,10 +150,18 @@ function initialFormChange() {
 
 function showForm() {
     $('#login-container').hide();
-    $('#form-container').show();
+    $('#form-container').css("display", "flex");
     /* Store the value of the selected vehicle type */
     const sicovUsername = $('#sicov-username');
     const sicovPassword = $('#sicov-password');
+    const paynetUsername = $('#paynet-username');
+    const paynetPassword = $('#paynet-password');
+    const paynetCredentials = {
+        username: paynetUsername.val(),
+        password: paynetPassword.val()
+    };
+    $('#header-user').text(sicovUsername.val());
+    localStorage.setItem('paynet-credentials', JSON.stringify(paynetCredentials));
     localStorage.setItem('sicov-username', sicovUsername.val());
     localStorage.setItem('sicov-password', sicovPassword.val());
 };
@@ -136,6 +182,124 @@ const sendVehicleData = async() => {
         cellphone: cellphone
     });
 };
+
+function resumeRevision() {
+    const plate = $('#selected-vehicle-plate').val();
+    const pendingRevisions = localStorage.getItem('pending-revisions');
+    if (pendingRevisions) {
+        const revisions = JSON.parse(pendingRevisions);
+        let index = 0;
+        for (const revision of revisions) {
+            if (revision.plate === plate) {
+                revisions.splice(index, 1);
+            }
+            index++;
+        }
+        console.log(revisions);
+        localStorage.setItem('pending-revisions', JSON.stringify(revisions));
+        $('.list-container').empty();
+        $('#selected-vehicle-plate').val('');
+        $('#selected-vehicle-plate-container').removeClass('is-dirty');
+        $('#selected-document-number').val('');
+        $('#selected-document-number-container').removeClass('is-dirty');
+        $('#selected-document-type').val('');
+        $('#selected-document-type-container').removeClass('is-dirty');
+        $('#selected-revision-type').val('');
+        $('#selected-revision-type-container').removeClass('is-dirty');
+        $('#selected-cellphone').val('');
+        $('#selected-cellphone-container').removeClass('is-dirty');
+        $('#selected-pin').val('');
+        $('#selected-pin-container').removeClass('is-dirty');
+        for (const revision of revisions) {
+            const listItem = $(`<div id="${revision.plate}" onclick='selectRevision("${revision.plate}");' class='list-item'></div>`).text(revision.plate);
+            $('.list-container').append(listItem);
+        }
+
+        if (revisions.length) {
+            const firstElement = revisions[0];
+            $(`#${firstElement.plate}`).click();
+        }
+    }
+
+}
+
+function selectRevision(id) {
+    $('.list-item').each(function(i, obj) {
+        $(this).removeClass('is-selected');
+    });
+    const pendingRevisions = localStorage.getItem('pending-revisions');
+    let selectedRevision;
+    if (pendingRevisions) {
+        const revisions = JSON.parse(pendingRevisions);
+        for (const revision of revisions) {
+            if (revision.plate === id) {
+                selectedRevision = revision;
+            }
+        }
+        if (selectedRevision) {
+            $(`#${id}`).addClass('is-selected');
+            console.log('se ha seleccionado', selectedRevision);
+            $('#selected-vehicle-plate').val(selectedRevision.plate);
+            $('#selected-vehicle-plate-container').addClass('is-dirty');
+            $('#selected-document-number').val(selectedRevision.document);
+            $('#selected-document-number-container').addClass('is-dirty');
+            $('#selected-document-type').val(selectedRevision.documentType);
+            $('#selected-document-type-container').addClass('is-dirty');
+            $('#selected-revision-type').val(selectedRevision.revisionType);
+            $('#selected-revision-type-container').addClass('is-dirty');
+            $('#selected-cellphone').val(selectedRevision.cellphone);
+            $('#selected-cellphone-container').addClass('is-dirty');
+            $('#selected-pin').val(selectedRevision.pin);
+            $('#selected-pin-container').addClass('is-dirty');
+        }
+    }
+
+}
+
+function showInitialForm() {
+    $('#initial-form').css('display', 'flex');
+    $('#progress-bar').show();
+    $('#failed-revisions').hide();
+}
+
+function showFailedRevisions() {
+    $('.list-container').empty();
+    const pendingRevisions = [];
+    const pendingRevision = {
+        'plate': 'HKQ558',
+        'document': '51914792',
+        'cellphone': '3217584129',
+        'pin': '123456',
+        'documentType': 'C',
+        'revisionType': 'Inicial'
+    };
+    const pendingRevision2 = {
+        'plate': '1HKQ558',
+        'document': '151914792',
+        'cellphone': '13217584129',
+        'pin': '1123456',
+        'documentType': 'C',
+        'revisionType': 'Inicial'
+    };
+    pendingRevisions.push(pendingRevision, pendingRevision2);
+    localStorage.setItem('pending-revisions', JSON.stringify(pendingRevisions));
+
+    $('#initial-form').hide();
+    $('#runt-webview').hide();
+    $('#paynet-webview').hide();
+    $('#sicre-webview').hide();
+    $('#progress-bar').hide();
+    $('#failed-revisions').css('display', 'flex');
+
+    for (const revision of pendingRevisions) {
+        const listItem = $(`<div id="${revision.plate}" onclick='selectRevision("${revision.plate}");' class='list-item'></div>`).text(revision.plate);
+        $('.list-container').append(listItem);
+    }
+
+    const firstElement = pendingRevisions[0];
+    $(`#${firstElement.plate}`).click();
+
+}
 
 const checkPaynetCredentials = async() => {
     let credentials = localStorage.getItem('paynet-credentials');
@@ -181,7 +345,8 @@ const checkPaynetCredentials = async() => {
 
 
 setTimeout(async() => {
-    runtWebview.openDevTools();
+    // sicreWebview.openDevTools();
+    // runtWebview.openDevTools();
     // paynetWebview.openDevTools();
 }, 500);
 
@@ -197,6 +362,36 @@ ipc.on('paynetLogin', (event, props) => {
     $('#status-report').append(statusContent);
 
 });
+
+ipc.on('pinCreated', (event, props) => {
+    Swal.fire({
+        title: 'Pin generado!',
+        text: "Se ha generado el ping correctamente. ¿Desea continuar a SICRE?",
+        icon: 'success',
+        html: `
+        <ul>
+            <li> PIN: ${props.pin} </li>
+        </ul>
+        `,
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Continuar a SICRE',
+        cancelButtonText: 'Cancelar'
+    }).then(async(result) => {
+        if (result.isConfirmed) {
+            // $('#status-report').show();
+            // $('#status-report').html('');
+            // var statusContent = '<span>Cargando SICRE</span>';
+            // $('#status-report').append(statusContent);
+            $('#paynet-webview').hide();
+            $('#sicre-webview').show();
+            $('#paynet-step').removeClass('current').addClass('done');
+            $('#sicre-step').addClass('current');
+        }
+    });
+});
+
 ipc.on('runt-error', (event, props) => {
     Swal.fire({
         icon: 'error',
@@ -288,7 +483,7 @@ ipc.on('vehicleData', (event, props) => {
                     await checkPaynetCredentials();
                     // await sendVehicleData();
                 }
-            })
+            });
 
 
         }, 1500);
