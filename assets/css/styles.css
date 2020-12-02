@@ -61,12 +61,6 @@
     display: none;
 }
 
-#paynet-webview {
-    width: 100%;
-    height: 100vh;
-    display: none;
-}
-
 .initial-form {
     display: flex;
     /* display: none; */
@@ -257,12 +251,6 @@
     font-size: 3rem;
 }
 
-#revision-type,
-#vehicle-type-select,
-#document-type {
-    color: #bfbfc7;
-}
-
 #continue-img {
     display: none;
 }
@@ -274,7 +262,6 @@
 .custom-select {
     width: 300px;
     background-color: white;
-    color: #bfbfc7;
     font-size: 16px;
     border-bottom: solid 1px gainsboro;
     margin-bottom: 10px;
@@ -289,9 +276,10 @@
     padding: 1rem;
     position: absolute;
     top: 20%;
-    border: solid 1px black;
-    background-color: white;
-    border-radius: 30px;
+    /* border: solid 1px black; */
+    background-color: var(--primary-yellow);
+    color: var(--primary-dark);
+    /* border-radius: 30px; */
     text-align: center;
 }
 

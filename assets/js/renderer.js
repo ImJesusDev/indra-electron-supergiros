@@ -10,20 +10,54 @@ const paynetWebview = document.getElementById('paynet-webview');
 const sicreWebview = document.getElementById('sicre-webview');
 
 let currentSicreState;
+let currentPaynetState;
+
+paynetWebview.addEventListener('did-stop-loading', async(event) => {
+    if (currentPaynetState.indexOf('login') >= 0) {
+        await checkPaynetCredentials();
+    }
+    if (currentPaynetState.indexOf('VentaPin') >= 0) {
+        paynetWebview.send('add-listeners', true);
+    }
+    if (currentPaynetState.indexOf('InformacionSeguridad') >= 0) {
+        // paynetWebview.send('navigate-to-pin', true);
+    }
+});
+
+paynetWebview.addEventListener('did-navigate', (event) => {
+    currentPaynetState = event.url;
+});
 
 /* Capture navigation events */
 sicreWebview.addEventListener('did-stop-loading', (event) => {
+    if (currentSicreState == 'login') {
+        console.log('login');
+        const username = localStorage.getItem('sicov-username');
+        const password = localStorage.getItem('sicov-password');
+        const data = {
+            'username': username,
+            'password': password
+        };
+        sicreWebview.send('start-login', data);
+    }
     if (currentSicreState == 'enter-plate') {
         const plate = localStorage.getItem('plate');
         const revisionType = localStorage.getItem('revision-type');
         const vehicleType = localStorage.getItem('vehicle-type');
         const documentNumber = localStorage.getItem('document-number');
+        const documentType = localStorage.getItem('document-type');
+        const pinNumber = localStorage.getItem('pin-number');
+        const pinValue = localStorage.getItem('pin-value');
+        const foreignVehicle = localStorage.getItem('foreign-vehicle');
         const data = {
             'plate': plate,
             'revisionType': revisionType,
             'vehicleType': vehicleType,
+            'documentType': documentType,
             'documentNumber': documentNumber,
-            'pinNumber': '123456'
+            'pinNumber': pinNumber,
+            'pinValue': pinValue,
+            'foreignVehicle': foreignVehicle
         };
         sicreWebview.send('enter-plate', data);
         currentSicreState = 'plate-entered';
@@ -32,13 +66,24 @@ sicreWebview.addEventListener('did-stop-loading', (event) => {
 
 sicreWebview.addEventListener('did-navigate', (event) => {
     console.log('did-navigate', event.url);
-    /* If the url is the sucursal selection */
-    if (event.url.indexOf('SeleccionarSucursal') >= 0) {
+    if (event.url.indexOf('Default') >= 0) {
+        console.log('here');
+        currentSicreState = 'login';
+    } else if (event.url.indexOf('SeleccionarSucursal') >= 0) {
         sicreWebview.send('sucursal-selection', true);
-    }
-    if (event.url.indexOf('FormalizacionRevision') >= 0) {
+    } else if (event.url.indexOf('?Placa') >= 0) {
+        sicreWebview.send('input-form-data', true);
+    } else if (event.url.indexOf('FormalizacionRevision') >= 0) {
         if (currentSicreState !== 'plate-entered') {
             currentSicreState = 'enter-plate';
+        } else {
+            // Revision finished
+            console.log('finished');
+            $('#paynet-step').removeClass('done');
+            $('#runt-step').removeClass('done');
+            $('#initial-step').addClass('current').removeClass('done');
+            $('#sicre-webview').hide();
+            $('#initial-form').show();
         }
     }
 });
@@ -87,13 +132,15 @@ function goToRunt() {
     $('#runt-step').addClass('current');
     /* Store the value of the selected vehicle type */
     const plate = $('#vehicle-plate');
+    const foreignVehicle = $('input[name=foreign-vehicle]:checked', '#revision-form');
     const documentNumber = $('#document-number');
     const documentType = $('#document-type');
     const cellphone = $('#cellphone');
     const revisionType = $('#revision-type');
     const vehicleType = $('#vehicle-type-select');
     localStorage.setItem('vehicle-type', vehicleType.val());
-    localStorage.setItem('vehicle-plate', plate.val());
+    localStorage.setItem('foreign-vehicle', foreignVehicle.val());
+    localStorage.setItem('plate', plate.val());
     localStorage.setItem('document-number', documentNumber.val());
     localStorage.setItem('document-type', documentType.val());
     localStorage.setItem('cellphone', cellphone.val());
@@ -125,19 +172,19 @@ function initialFormChange() {
     const revisionType = $('#revision-type');
     const vehicleType = $('#vehicle-type-select');
     if (revisionType.val()) {
-        $('#revision-type').css("color", "black");
+        $('#revision-type').addClass("is-dirty");
     } else {
-        $('#revision-type').css("color", "#bfbfc7");
+        $('#revision-type').removeClass("is-dirty");
     }
     if (documentType.val()) {
-        $('#document-type').css("color", "black");
+        $('#document-type').addClass("color", "black");
     } else {
-        $('#document-type').css("color", "#bfbfc7");
+        $('#document-type').removeClass("is-dirty");
     }
     if (vehicleType.val()) {
-        $('#vehicle-type-select').css("color", "black");
+        $('#vehicle-type-select').addClass("color", "black");
     } else {
-        $('#vehicle-type-select').css("color", "#bfbfc7");
+        $('#vehicle-type-select').removeClass("is-dirty");
     }
     if (plate.val() && documentNumber.val() && cellphone.val() && documentType.val() && revisionType.val() && vehicleType.val()) {
         $('#continue-disabled').hide();
@@ -345,10 +392,20 @@ const checkPaynetCredentials = async() => {
 
 
 setTimeout(async() => {
-    // sicreWebview.openDevTools();
+    sicreWebview.openDevTools();
     // runtWebview.openDevTools();
     // paynetWebview.openDevTools();
 }, 500);
+
+ipc.on('revision-finished', (event, props) => {
+    console.log('finished');
+    $('#paynet-step').removeClass('done');
+    $('#runt-step').removeClass('done');
+    $('#initial-step').addClass('current').removeClass('done');
+    $('#sicre-webview').hide();
+    $('#initial-form').show();
+});
+
 
 // ipc.on('runtFormData', (event, props) => {
 //     localStorage.setItem('document-type', props.documentType);
@@ -364,6 +421,14 @@ ipc.on('paynetLogin', (event, props) => {
 });
 
 ipc.on('pinCreated', (event, props) => {
+    localStorage.setItem('pin-number', props.pin);
+    const pinValue = props.pinValue;
+    let parsedValue = pinValue.replace('$', '');
+    console.log(parsedValue);
+    parsedValue.replace('.', '')
+    console.log(parsedValue);
+    localStorage.setItem('pin-value', parsedValue);
+    localStorage.setItem('transaction-number', props.transactionNumber);
     Swal.fire({
         title: 'Pin generado!',
         text: "Se ha generado el ping correctamente. ¿Desea continuar a SICRE?",
@@ -371,6 +436,8 @@ ipc.on('pinCreated', (event, props) => {
         html: `
         <ul>
             <li> PIN: ${props.pin} </li>
+            <li> Transacción Nro.: ${props.transactionNumber} </li>
+            <li> Valor PIN: ${props.pinValue} </li>
         </ul>
         `,
         showCancelButton: true,
@@ -385,6 +452,7 @@ ipc.on('pinCreated', (event, props) => {
             // var statusContent = '<span>Cargando SICRE</span>';
             // $('#status-report').append(statusContent);
             $('#paynet-webview').hide();
+            $('#paynet-webview').attr('src', 'https://indra.paynet.com.co:14443/InformacionSeguridad.aspx');
             $('#sicre-webview').show();
             $('#paynet-step').removeClass('current').addClass('done');
             $('#sicre-step').addClass('current');
@@ -420,12 +488,21 @@ ipc.on('pinRedirect', (event, props) => {
 });
 ipc.on('loadingPinInfo', (event, props) => {
     $('#status-report').html('');
-    var statusContent = '<span>Ingresando información</span>';
+    $('#status-report').show();
+    var statusContent = '<span>Ingresando información, por favor espere...</span>';
     $('#status-report').append(statusContent);
-    setTimeout(() => {
-        $('#status-report').hide();
-    }, 600);
 
+});
+
+ipc.on('infoCompleted', (event, props) => {
+    $('#status-report').html('');
+    var statusContent = '<span>Información completada, presione el botón "Siguiente"...</span>';
+    $('#status-report').append(statusContent);
+
+});
+ipc.on('nextPressed', (event, props) => {
+    $('#status-report').html('');
+    $('#status-report').hide('');
 });
 
 ipc.on('vehicleData', (event, props) => {
@@ -471,6 +548,7 @@ ipc.on('vehicleData', (event, props) => {
                 cancelButtonText: 'Cancelar'
             }).then(async(result) => {
                 if (result.isConfirmed) {
+                    paynetWebview.send('navigate-to-pin', true);
                     $('#status-report').show();
                     $('#status-report').html('');
                     var statusContent = '<span>Cargando Paynet</span>';
