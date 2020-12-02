@@ -22,6 +22,10 @@
     display: none;
 }
 
+.error-msg {
+    background-color: var(--primary-pink) !important;
+}
+
 #sicre-webview {
     width: 100%;
     height: 100vh;
