@@ -66,6 +66,7 @@ const addMakeRevisionListener = async() => {
         });
 
     }, 2000);
+    ipc.sendTo(1, 'info-entered', true);
 };
 
 const setPin = async(pin) => {

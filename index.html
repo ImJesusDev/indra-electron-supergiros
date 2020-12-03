@@ -128,13 +128,15 @@
                     <div class="header-logo">
                         <img src="assets/images/minsait-dark.svg" alt="Minsait">
                     </div>
-                    <div class="header-user" id="header-user">
-
+                    <div class="user-info">
+                        <div class="header-user" id="header-user">
+                        </div>
+                        <img onclick="logout()" id="logout-img" src="assets/images/logout.svg" alt="Cerrar Sesión" title="Cerrar Sesión">
                     </div>
                 </div>
                 <div class="navbar">
                     <div onclick="showInitialForm()" class="navbar-item"> Iniciar revisión </div>
-                    <div onclick="showFailedRevisions()" class="navbar-item"> Revisiones fallidas </div>
+                    <!-- <div onclick="showFailedRevisions()" class="navbar-item"> Revisiones fallidas </div> -->
                 </div>
             </div>
             <!-- Heading -->
@@ -162,7 +164,7 @@
 
                     <div>
                         <div class="is-dirty mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input onkeyup="initialFormChange()" value="HKQ558" class="mdl-textfield__input" type="text" id="vehicle-plate">
+                            <input onkeyup="initialFormChange()" value="FRR35D" class="mdl-textfield__input" type="text" id="vehicle-plate">
                             <label class="mdl-textfield__label" for="vehicle-plate">Placa del vehículo</label>
                         </div>
                     </div>
@@ -181,7 +183,7 @@
                     </div>
                     <div>
                         <div class="is-dirty mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input value="51914792" onkeyup="initialFormChange()" class="mdl-textfield__input" type="text" id="document-number">
+                            <input value="1108452342" onkeyup="initialFormChange()" class="mdl-textfield__input" type="text" id="document-number">
                             <label class="mdl-textfield__label" for="document-number">Número de documento</label>
                         </div>
                     </div>

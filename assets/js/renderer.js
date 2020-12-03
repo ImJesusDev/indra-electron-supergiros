@@ -64,6 +64,13 @@ sicreWebview.addEventListener('did-stop-loading', (event) => {
     }
 });
 
+ipc.on('info-entered', (event, props) => {
+    $('#status-report').html('');
+    var statusContent = '<span>Por favor, verifique la información, y haga click en Formalizar Revisión!</span>';
+    $('#status-report').append(statusContent);
+    $('#status-report').show();
+});
+
 sicreWebview.addEventListener('did-navigate', (event) => {
     console.log('did-navigate', event.url);
     if (event.url.indexOf('Default') >= 0) {
@@ -72,13 +79,26 @@ sicreWebview.addEventListener('did-navigate', (event) => {
     } else if (event.url.indexOf('SeleccionarSucursal') >= 0) {
         sicreWebview.send('sucursal-selection', true);
     } else if (event.url.indexOf('?Placa') >= 0) {
+        $('#status-report').html('');
+        var statusContent = '<span>Ingresando Información!</span>';
+        $('#status-report').append(statusContent);
+        $('#status-report').show();
         sicreWebview.send('input-form-data', true);
     } else if (event.url.indexOf('FormalizacionRevision') >= 0) {
         if (currentSicreState !== 'plate-entered') {
             currentSicreState = 'enter-plate';
         } else {
             // Revision finished
-            console.log('finished');
+            console.log('finished by url');
+            $('#status-report').show();
+            $('#status-report').html('');
+            var statusContent = '<span>Formalizacion realizada!</span>';
+            $('#status-report').append(statusContent);
+            setTimeout(() => {
+                $('#status-report').html('');
+                $('#status-report').hide();
+            }, 3000);
+            $('#sicre-webview').attr('src', 'http://172.17.4.130:8055/Default');
             $('#paynet-step').removeClass('done');
             $('#runt-step').removeClass('done');
             $('#initial-step').addClass('current').removeClass('done');
@@ -128,6 +148,7 @@ async function openSettings() {
 function goToRunt() {
     $('#initial-form').hide();
     $('#runt-webview').show();
+    $('html,body').scrollTop(0);
     $('#initial-step').removeClass('current').addClass('done');
     $('#runt-step').addClass('current');
     /* Store the value of the selected vehicle type */
@@ -193,6 +214,30 @@ function initialFormChange() {
         $('#continue-disabled').show();
         $('#continue-img').hide();
     }
+}
+
+function logout() {
+
+    Swal.fire({
+        title: 'Cerrar sesión',
+        text: "¿Desea finalizar la sesión?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#79c5b4',
+        cancelButtonColor: '#e88aa2',
+        confirmButtonText: 'Cerrar',
+        cancelButtonText: 'Cancelar'
+    }).then(async(result) => {
+        if (result.isConfirmed) {
+            localStorage.clear();
+            $('#login-container').css("display", "flex");
+            $('#form-container').hide();
+        }
+    });
+
+
+
+
 }
 
 function showForm() {
@@ -434,12 +479,21 @@ const checkPaynetCredentials = async() => {
 
 setTimeout(async() => {
     // sicreWebview.openDevTools();
-    // runtWebview.openDevTools();
+    runtWebview.openDevTools();
     // paynetWebview.openDevTools();
 }, 500);
 
 ipc.on('revision-finished', (event, props) => {
     console.log('finished');
+    $('#status-report').show();
+    $('#status-report').html('');
+    var statusContent = '<span>Formalizacion realizada!</span>';
+    $('#status-report').append(statusContent);
+    setTimeout(() => {
+        $('#status-report').html('');
+        $('#status-report').hide();
+    }, 3000);
+    $('#sicre-webview').attr('src', 'http://172.17.4.130:8055/Default');
     $('#paynet-step').removeClass('done');
     $('#runt-step').removeClass('done');
     $('#initial-step').addClass('current').removeClass('done');
@@ -482,8 +536,8 @@ ipc.on('pinCreated', (event, props) => {
         </ul>
         `,
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#79c5b4',
+        cancelButtonColor: '#e88aa2',
         confirmButtonText: 'Continuar a SICRE',
         cancelButtonText: 'Cancelar'
     }).then(async(result) => {
@@ -492,9 +546,14 @@ ipc.on('pinCreated', (event, props) => {
             // $('#status-report').html('');
             // var statusContent = '<span>Cargando SICRE</span>';
             // $('#status-report').append(statusContent);
+            $('#status-report').html('');
+            var statusContent = '<span>Por favor seleccione la sucursal</span>';
+            $('#status-report').append(statusContent);
+            $('#status-report').show();
             $('#paynet-webview').hide();
             $('#paynet-webview').attr('src', 'https://indra.paynet.com.co:14443/InformacionSeguridad.aspx');
             $('#sicre-webview').show();
+            $('html,body').scrollTop(0);
             $('#paynet-step').removeClass('current').addClass('done');
             $('#sicre-step').addClass('current');
         }
@@ -583,8 +642,8 @@ ipc.on('vehicleData', (event, props) => {
                 </ul>
                 `,
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
+                confirmButtonColor: '#79c5b4',
+                cancelButtonColor: '#e88aa2',
                 confirmButtonText: 'Continuar a Paynet',
                 cancelButtonText: 'Cancelar'
             }).then(async(result) => {
@@ -596,6 +655,7 @@ ipc.on('vehicleData', (event, props) => {
                     $('#status-report').append(statusContent);
                     $('#runt-webview').hide();
                     $('#paynet-webview').show();
+                    $('html,body').scrollTop(0);
                     $('#runt-step').removeClass('current').addClass('done');
                     $('#paynet-step').addClass('current');
                     runtWebview.send('newRequest', true);

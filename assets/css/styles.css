@@ -16,6 +16,18 @@
     font-family: "SohoLight";
 }
 
+#logout-img {
+    width: 20px;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.user-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #runt-webview {
     width: 100%;
     height: 100vh;
@@ -285,6 +297,7 @@
     color: var(--primary-dark);
     /* border-radius: 30px; */
     text-align: center;
+    z-index: 999;
 }
 
 #status-report span {
