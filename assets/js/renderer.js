@@ -98,7 +98,8 @@ sicreWebview.addEventListener('did-navigate', (event) => {
                 $('#status-report').html('');
                 $('#status-report').hide();
             }, 3000);
-            $('#sicre-webview').attr('src', 'http://172.17.4.130:8055/Default');
+            let url = localStorage.getItem('sicre-url');
+            $('#sicre-webview').attr('src', url);
             $('#paynet-step').removeClass('done');
             $('#runt-step').removeClass('done');
             $('#initial-step').addClass('current').removeClass('done');
@@ -289,6 +290,9 @@ function showForm() {
                 localStorage.setItem('sicov-username', sicovUsername.val());
                 localStorage.setItem('sicov-password', sicovPassword.val());
                 localStorage.setItem('auth-token', response.token);
+                localStorage.setItem('sicre-url', response.url);
+                $('#sicre-webview').attr('src', response.url);
+
 
             }
 
@@ -493,7 +497,8 @@ ipc.on('revision-finished', (event, props) => {
         $('#status-report').html('');
         $('#status-report').hide();
     }, 3000);
-    $('#sicre-webview').attr('src', 'http://172.17.4.130:8055/Default');
+    let url = localStorage.getItem('sicre-url');
+    $('#sicre-webview').attr('src', url);
     $('#paynet-step').removeClass('done');
     $('#runt-step').removeClass('done');
     $('#initial-step').addClass('current').removeClass('done');
