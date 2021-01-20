@@ -209,7 +209,7 @@ const getRequestInfo = async() => {
                 lastRequestState: lastRequestState.trim(),
                 lastRequestEntity: lastRequestEntity.trim()
             });
-        }, 300);
+        }, 1000);
     });
 };
 
