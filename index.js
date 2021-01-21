@@ -40,7 +40,7 @@ app.whenReady().then(createWindow).then(() => {
     session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
         details.requestHeaders['User-Agent'] = userAgent;
         callback({ requestHeaders: details.requestHeaders })
-    })
+    });
 });
 
 app.on('window-all-closed', () => {

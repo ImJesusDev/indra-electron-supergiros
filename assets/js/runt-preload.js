@@ -31,7 +31,6 @@ ipc.on('runt-form-data', async(event, props) => {
 });
 /* Add listener for when the content is loaded */
 document.addEventListener('DOMContentLoaded', async(event) => {
-    console.log('domloaded');
     /* Add timeout to prevent errors (button not rendered) */
     setTimeout(async() => {
         if (document.title.indexOf('Error') >= 0) {
@@ -44,23 +43,6 @@ document.addEventListener('DOMContentLoaded', async(event) => {
 
             /* Add Event on click for the button */
             matchingElement.addEventListener("click", async() => {
-                /* Store the selected values of the form */
-                // const form = document.getElementsByName('consultaAutomotorFrm');
-                // const documentTypeValue = form[0].childNodes[11].childNodes[3].childNodes[3].value;
-
-                // const plate = $('#noPlaca');
-
-
-                // const documentNumber = $('input[name ="noDocumento"]');
-
-
-                // const formData = {
-                //     documentNumber: documentNumber.val(),
-                //     plate: plate.val(),
-                //     documentType: documentTypeValue
-                // };
-
-                // ipc.sendTo(1, 'runtFormData', formData);
 
 
                 /* Add timeout after the button is clicked */
@@ -97,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async(event) => {
                     });
                     // await newRequest();
 
-                }, 500);
+                }, 1000);
             });
         }
 
