@@ -474,8 +474,8 @@ const checkPaynetCredentials = async() => {
     //         sendVehicleData();
     //     }
     // } else {
-        paynetWebview.send('paynetCredentials', JSON.parse(credentials));
-        sendVehicleData();
+    paynetWebview.send('paynetCredentials', JSON.parse(credentials));
+    sendVehicleData();
     // }
 
 };
@@ -514,9 +514,9 @@ ipc.on('revision-finished', (event, props) => {
 // });
 
 ipc.on('paynetLogin', (event, props) => {
-    $('#status-report').html('');
-    var statusContent = '<span>Iniciando Sesión!</span>';
-    $('#status-report').append(statusContent);
+    // $('#status-report').html('');
+    // var statusContent = '<span>Iniciando Sesión!</span>';
+    // $('#status-report').append(statusContent);
 
 });
 
