@@ -5,12 +5,6 @@ let currentState;
 /* Add listener for when the content is loaded */
 document.addEventListener('DOMContentLoaded', async(event) => {
 
-    // window.$ = window.jQuery = require(path.join(__dirname, '/jquery-1.11.1.min.js'));
-    if (window.location.href === 'http://172.17.4.130:8055/Default') {
-
-    }
-
-
 
 }, false);
 ipc.on('sucursal-selection', async(event, props) => {
@@ -30,18 +24,18 @@ ipc.on('input-form-data', async(event, props) => {
     const documentType = localStorage.getItem('documentType');
     const documentNumber = localStorage.getItem('documentNumber');
     const pinNumber = localStorage.getItem('pinNumber');
-    const pinValue = localStorage.getItem('pinValue');
+    // const pinValue = localStorage.getItem('pinValue');
     const foreignVehicleVal = localStorage.getItem('foreignVehicle');
     const category = localStorage.getItem('vehicleType');
     const revisionType = localStorage.getItem('revisionType');
     await setPin(pinNumber);
-    await setPinValue(pinValue);
+    // await setPinValue(pinValue);
     await setDocumentType(documentType);
     await setDocumentNumber(documentNumber);
     await setForeignVehicle(foreignVehicleVal);
     await setCategory(category);
     await setRevisionType(revisionType);
-    await checkPin();
+    // await checkPin();
     await addMakeRevisionListener();
 });
 ipc.on('enter-plate', async(event, props) => {

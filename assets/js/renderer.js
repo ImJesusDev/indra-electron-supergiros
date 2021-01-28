@@ -4,31 +4,13 @@ const { ipcRenderer: ipc } = require('electron');
 const Swal = require('sweetalert2');
 /* Runt */
 const runtWebview = document.getElementById('runt-webview');
-/* Paynet */
-const paynetWebview = document.getElementById('paynet-webview');
+
 /* Sicre */
 const sicreWebview = document.getElementById('sicre-webview');
 /* File system */
 const fs = require('fs');
 
 let currentSicreState;
-let currentPaynetState;
-
-paynetWebview.addEventListener('did-stop-loading', async(event) => {
-    if (currentPaynetState.indexOf('login') >= 0) {
-        await checkPaynetCredentials();
-    }
-    if (currentPaynetState.indexOf('VentaPin') >= 0) {
-        paynetWebview.send('add-listeners', true);
-    }
-    if (currentPaynetState.indexOf('InformacionSeguridad') >= 0) {
-        // paynetWebview.send('navigate-to-pin', true);
-    }
-});
-
-paynetWebview.addEventListener('did-navigate', (event) => {
-    currentPaynetState = event.url;
-});
 
 /* Capture navigation events */
 sicreWebview.addEventListener('did-stop-loading', (event) => {
@@ -104,7 +86,6 @@ sicreWebview.addEventListener('did-navigate', (event) => {
             const json = data.toString('utf8');
             settings = JSON.parse(json);
             $('#sicre-webview').attr('src', settings.SICRE_URL);
-            $('#paynet-step').removeClass('done');
             $('#runt-step').removeClass('done');
             $('#initial-step').addClass('current').removeClass('done');
             $('#sicre-webview').hide();
@@ -112,43 +93,6 @@ sicreWebview.addEventListener('did-navigate', (event) => {
         }
     }
 });
-
-async function openSettings() {
-
-    const savedCredentials = localStorage.getItem('paynet-credentials');
-    const parsedValues = JSON.parse(savedCredentials)
-    const { value: formValues } = await Swal.fire({
-        title: 'Credenciales Paynet.',
-        html: `
-        <div class="w-full">
-            <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
-                        Nombre de Usuario
-                    </label>
-                    <input value=${parsedValues.username} required id="username" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Nombre de Usuario">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                        Clave
-                    </label>
-                    <input value=${parsedValues.password} required id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
-                </div>
-            </form>
-        </div>`,
-        focusConfirm: false,
-        preConfirm: () => {
-            return {
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value
-            }
-        }
-    });
-
-    if (formValues && formValues.username && formValues.password) {
-        localStorage.setItem('paynet-credentials', JSON.stringify(formValues));
-    }
-}
 
 function goToRunt() {
     $('#initial-form').hide();
@@ -182,9 +126,7 @@ function goToRunt() {
 function sicovInputChange() {
     const sicovUsername = $('#sicov-username');
     const sicovPassword = $('#sicov-password');
-    const paynetUsername = $('#paynet-username');
-    const paynetPassword = $('#paynet-password');
-    if (sicovUsername.val() && sicovPassword.val() && paynetUsername.val() && paynetPassword.val()) {
+    if (sicovUsername.val() && sicovPassword.val()) {
         $('#sicov-btn-disabled').hide();
         $('#sicov-btn-enabled').show();
     }
@@ -259,21 +201,14 @@ function showForm() {
     $('#status-report').hide();
     $('#login-container').hide();
     $('#form-container').css("display", "flex");
-    /* Store the value of the selected vehicle type */
-    const paynetUsername = $('#paynet-username');
-    const paynetPassword = $('#paynet-password');
-    const paynetCredentials = {
-        username: paynetUsername.val(),
-        password: paynetPassword.val()
-    };
+
     $('#header-user').text(sicovUsername.val());
-    localStorage.setItem('paynet-credentials', JSON.stringify(paynetCredentials));
     localStorage.setItem('sicov-username', sicovUsername.val());
     localStorage.setItem('sicov-password', sicovPassword.val());
     // localStorage.setItem('auth-token', response.token);
     const sicreUrl = localStorage.getItem('sicre-url');
     $('#sicre-webview').attr('src', sicreUrl);
-    
+
 
 }
 
@@ -284,14 +219,6 @@ const sendVehicleData = async() => {
     const model = localStorage.getItem('vehicle-model');
     const vehicleType = localStorage.getItem('vehicle-type');
     const cellphone = localStorage.getItem('cellphone');
-    paynetWebview.send('vehicleData', {
-        documentNumber: documentNumber,
-        plate: plate,
-        documentType: documentType,
-        model: model,
-        vehicleType: vehicleType,
-        cellphone: cellphone
-    });
 };
 
 function resumeRevision() {
@@ -397,7 +324,6 @@ function showFailedRevisions() {
 
     $('#initial-form').hide();
     $('#runt-webview').hide();
-    $('#paynet-webview').hide();
     $('#sicre-webview').hide();
     $('#progress-bar').hide();
     $('#failed-revisions').css('display', 'flex');
@@ -413,44 +339,6 @@ function showFailedRevisions() {
 }
 
 const checkPaynetCredentials = async() => {
-    let credentials = localStorage.getItem('paynet-credentials');
-    // if (!credentials) {
-    //     const { value: formValues } = await Swal.fire({
-    //         title: 'Es la primera vez que usas la aplicacion, por favor ingresa tus credenciales Paynet.',
-    //         html: `
-    //         <div class="w-full">
-    //             <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-    //                 <div class="mb-4">
-    //                     <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
-    //                         Nombre de Usuario
-    //                     </label>
-    //                     <input required id="username" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="Nombre de Usuario">
-    //                 </div>
-    //                 <div class="mb-6">
-    //                     <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-    //                         Clave
-    //                     </label>
-    //                     <input required id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
-    //                 </div>
-    //             </form>
-    //         </div>`,
-    //         focusConfirm: false,
-    //         preConfirm: () => {
-    //             return {
-    //                 username: document.getElementById('username').value,
-    //                 password: document.getElementById('password').value
-    //             }
-    //         }
-    //     })
-    //     if (formValues && formValues.username && formValues.password) {
-    //         localStorage.setItem('paynet-credentials', JSON.stringify(formValues));
-    //         paynetWebview.send('paynetCredentials', formValues);
-    //         sendVehicleData();
-    //     }
-    // } else {
-    paynetWebview.send('paynetCredentials', JSON.parse(credentials));
-    sendVehicleData();
-    // }
 
 };
 
@@ -458,7 +346,6 @@ const checkPaynetCredentials = async() => {
 setTimeout(async() => {
     // sicreWebview.openDevTools();
     runtWebview.openDevTools();
-    // paynetWebview.openDevTools();
 }, 500);
 
 ipc.on('revision-finished', (event, props) => {
@@ -473,7 +360,6 @@ ipc.on('revision-finished', (event, props) => {
     }, 3000);
     let url = localStorage.getItem('sicre-url');
     $('#sicre-webview').attr('src', url);
-    $('#paynet-step').removeClass('done');
     $('#runt-step').removeClass('done');
     $('#initial-step').addClass('current').removeClass('done');
     $('#sicre-webview').hide();
@@ -488,9 +374,6 @@ ipc.on('revision-finished', (event, props) => {
 // });
 
 ipc.on('paynetLogin', (event, props) => {
-    // $('#status-report').html('');
-    // var statusContent = '<span>Iniciando Sesión!</span>';
-    // $('#status-report').append(statusContent);
 
 });
 
@@ -505,7 +388,7 @@ ipc.on('pinCreated', (event, props) => {
     localStorage.setItem('transaction-number', props.transactionNumber);
     Swal.fire({
         title: 'Pin generado!',
-        text: "Se ha generado el ping correctamente. ¿Desea continuar a SICRE?",
+        text: "Se ha generado el pin correctamente. ¿Desea continuar a SICRE?",
         icon: 'success',
         html: `
         <ul>
@@ -529,11 +412,8 @@ ipc.on('pinCreated', (event, props) => {
             var statusContent = '<span>Por favor seleccione la sucursal</span>';
             $('#status-report').append(statusContent);
             $('#status-report').show();
-            $('#paynet-webview').hide();
-            $('#paynet-webview').attr('src', 'https://indra.paynet.com.co:14443/InformacionSeguridad.aspx');
             $('#sicre-webview').show();
             $('html,body').scrollTop(0);
-            $('#paynet-step').removeClass('current').addClass('done');
             $('#sicre-step').addClass('current');
         }
     });
@@ -606,7 +486,7 @@ ipc.on('vehicleData', (event, props) => {
             $('#status-report').hide();
             Swal.fire({
                 title: 'Información obtenida!',
-                text: "Se ha consultado la información correctamente. ¿Desea continuar a Paynet?",
+                text: "Se ha consultado la información correctamente. ¿Desea continuar?",
                 icon: 'success',
                 html: `
                 <ul>
@@ -623,23 +503,43 @@ ipc.on('vehicleData', (event, props) => {
                 showCancelButton: true,
                 confirmButtonColor: '#79c5b4',
                 cancelButtonColor: '#e88aa2',
-                confirmButtonText: 'Continuar a Paynet',
+                confirmButtonText: 'Continuar',
                 cancelButtonText: 'Cancelar'
             }).then(async(result) => {
                 if (result.isConfirmed) {
-                    paynetWebview.send('navigate-to-pin', true);
-                    $('#status-report').show();
-                    $('#status-report').html('');
-                    var statusContent = '<span>Cargando Paynet</span>';
-                    $('#status-report').append(statusContent);
-                    $('#runt-webview').hide();
-                    $('#paynet-webview').show();
-                    $('html,body').scrollTop(0);
-                    $('#runt-step').removeClass('current').addClass('done');
-                    $('#paynet-step').addClass('current');
-                    runtWebview.send('newRequest', true);
-                    await checkPaynetCredentials();
-                    // await sendVehicleData();
+                    const { value: formValues } = await Swal.fire({
+                        title: 'Por favor, ingresa el pin de Supergiros para continuar..',
+                        html: `
+                        <div class="w-full">
+                            <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="pin">
+                                        PIN
+                                    </label>
+                                    <input required id="pin" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="pin" type="text" placeholder="Pin Supergiros">
+                                </div>
+                            </form>
+                        </div>`,
+                        focusConfirm: false,
+                        preConfirm: () => {
+                            return {
+                                pin: document.getElementById('pin').value,
+                            }
+                        }
+                    })
+                    if (formValues && formValues.pin) {
+                        localStorage.setItem('pin-number', formValues.pin);
+                        $('#status-report').html('');
+                        var statusContent = '<span>Por favor seleccione la sucursal</span>';
+                        $('#status-report').append(statusContent);
+                        $('#status-report').show();
+                        $('#runt-webview').hide();
+                        $('#sicre-webview').show();
+                        $('html,body').scrollTop(0);
+                        $('#sicre-step').addClass('current');
+                        $('#runt-step').removeClass('current').addClass('done');
+                        runtWebview.send('newRequest', true);
+                    }
                 }
             });
 
