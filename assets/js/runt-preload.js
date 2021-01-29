@@ -1,84 +1,96 @@
 const { ipcRenderer: ipc } = require('electron');
 
+let userDocument;
+let userVehiclePlate;
+let userDocumentType;
 
 ipc.on('newRequest', async(event, props) => {
     await newRequest();
+});
+
+ipc.on('runt-form-data', async(event, props) => {
+    console.log('runt-form-data', props);
+    userDocument = props.documentNumber;
+    userVehiclePlate = props.plate;
+    userDocumentType = props.documentType;
+    /* Plate input */
+    let plateInput = $('#noPlaca');
+    console.log('hereeee', userVehiclePlate);
+    plateInput.val(userVehiclePlate);
+    plateInput.trigger('input');
+
+    /* Document number input */
+    let documentNumberInput = $('input[name ="noDocumento"]');
+    documentNumberInput.val(userDocument);
+    documentNumberInput.trigger('input');
+
+    let documentTypeXpath = "//label[text()='Tipo de Documento:']";
+    let documentMatchingElement = document.evaluate(documentTypeXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    let documentTypeSelect = documentMatchingElement.parentElement.childNodes[3].childNodes[3];
+    documentTypeSelect.value = userDocumentType;
 });
 /* Add listener for when the content is loaded */
 document.addEventListener('DOMContentLoaded', async(event) => {
     /* Add timeout to prevent errors (button not rendered) */
     setTimeout(async() => {
+        if (document.title.indexOf('Error') >= 0) {
+            ipc.sendTo(1, 'runt-error', true);
+        } else {
+            /* Find button to make the request for vehicle information */
+            let xpath = "//button[text()='Consultar Información']";
 
-        /* Plate input */
-        // let plateInput = $('#noPlaca');
-        // plateInput.val('HKQ558');
-        // plateInput.trigger('input');
+            let matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 
-        /* Document number input */
-        // let documentNumberInput = $('input[name ="noDocumento"]');
-        // documentNumberInput.val('51914792');
-        // documentNumberInput.trigger('input');
-
-        /* Find button to make the request for vehicle information */
-        let xpath = "//button[text()='Consultar Información']";
-
-        let matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-
-        /* Add Event on click for the button */
-        matchingElement.addEventListener("click", async() => {
-            /* Store the selected values of the form */
-            const form = document.getElementsByName('consultaAutomotorFrm');
-            const documentTypeValue = form[0].childNodes[11].childNodes[3].childNodes[3].value;
-
-            const plate = $('#noPlaca');
+            /* Add Event on click for the button */
+            matchingElement.addEventListener("click", async() => {
 
 
-            const documentNumber = $('input[name ="noDocumento"]');
+                /* Add timeout after the button is clicked */
+                setTimeout(async() => {
+                    let theMake = await getVehicleMake();
+                    let theModel = await getVehicleModel();
+                    let theLine = await getVehicleLine();
+                    let theColor = await getVehicleColor();
+                    let theState = await getVehicleState();
+                    await sendData('vehicleInfo', {
+                        make: theMake,
+                        model: theModel,
+                        line: theLine,
+                        color: theColor,
+                        state: theState,
+                    });
+
+                    let soatInfo = await getSoatInfo();
+                    let lastRequestInfo = await getRequestInfo();
+
+                    await sendData('otherInfo', {
+                        soat: soatInfo,
+                        lastRequest: lastRequestInfo
+                    })
+
+                    await sendData('done', {
+                        make: theMake,
+                        model: theModel,
+                        line: theLine,
+                        color: theColor,
+                        state: theState,
+                        soat: soatInfo,
+                        lastRequest: lastRequestInfo
+                    });
+                    // await newRequest();
+
+                }, 1000);
+            });
+        }
 
 
-            const formData = {
-                documentNumber: documentNumber.val(),
-                plate: plate.val(),
-                documentType: documentTypeValue
-            };
-
-            ipc.sendTo(1, 'runtFormData', formData);
-
-
-            /* Add timeout after the button is clicked */
-            setTimeout(async() => {
-                let theMake = await getVehicleMake();
-                let theModel = await getVehicleModel();
-                let theLine = await getVehicleLine();
-                let theColor = await getVehicleColor();
-                let theState = await getVehicleState();
-                await sendData('vehicleInfo', {
-                    make: theMake,
-                    model: theModel,
-                    line: theLine,
-                    color: theColor,
-                    state: theState,
-                });
-
-                let soatInfo = await getSoatInfo();
-                let lastRequestInfo = await getRequestInfo();
-
-                await sendData('otherInfo', {
-                    soat: soatInfo,
-                    lastRequest: lastRequestInfo
-                })
-
-                await sendData('done', true);
-                // await newRequest();
-
-            }, 500);
-        });
-    }, 3000);
+    }, 2000);
 
 }, false);
 
 
 const sendData = async(type, data) => {
+    console.log(data);
     const dataToSend = {
         type: type,
         data: data
@@ -179,7 +191,7 @@ const getRequestInfo = async() => {
                 lastRequestState: lastRequestState.trim(),
                 lastRequestEntity: lastRequestEntity.trim()
             });
-        }, 300);
+        }, 1000);
     });
 };
 
