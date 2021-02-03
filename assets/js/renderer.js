@@ -345,7 +345,7 @@ const checkPaynetCredentials = async() => {
 
 setTimeout(async() => {
     // sicreWebview.openDevTools();
-    runtWebview.openDevTools();
+    // runtWebview.openDevTools();
 }, 500);
 
 ipc.on('revision-finished', (event, props) => {

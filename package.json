@@ -5,7 +5,7 @@
     "main": "index.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/ImJesusDev/indra-electron.git"
+        "url": "https://github.com/ImJesusDev/indra-electron-supergiros"
     },
     "scripts": {
         "start": "electron .",
