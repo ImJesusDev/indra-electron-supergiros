@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', async(event) => {
             let xpath = "//button[text()='Consultar Información']";
 
             let matchingElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+            //cxpath procedencia
+            let xpathP = "//label[text()='Procedencia:']";
+            let matchingElementP = document.evaluate(xpathP, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+            let procedencia = matchingElementP.parentElement.parentElement.nextElementSibling.childNodes[1].childNodes[3].value;
+            console.log(procedencia);
 
             /* Add Event on click for the button */
             matchingElement.addEventListener("click", async() => {
@@ -56,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async(event) => {
                     let serviceType = await getServiceType();
                     let motorNumber = await getMotorNumber();
                     let chasisNumber = await getChasisNumber();
+                    let serieNumber = await getSerieNumber();
                     let cylinderCapacity = await getCylinderCapacity();
                     let fuelType = await getFuelType();
                     let vinNumber = await getVinNumber();
@@ -74,7 +80,9 @@ document.addEventListener('DOMContentLoaded', async(event) => {
                         serviceType: serviceType,
                         motorNumber: motorNumber,
                         fuelType: fuelType,
-                        vinNumber: vinNumber
+                        vinNumber: vinNumber,
+                        procedencia: procedencia,
+                        serieNumber: serieNumber
                     });
 
                     let soatInfo = await getSoatInfo();
@@ -105,7 +113,9 @@ document.addEventListener('DOMContentLoaded', async(event) => {
                         vinNumber: vinNumber,
                         chasisNumber: chasisNumber,
                         cylinderCapacity: cylinderCapacity,
-                        armoredInfo: armoredInfo
+                        armoredInfo: armoredInfo,
+                        procedencia: procedencia,
+                        serieNumber: serieNumber
                     });
                     // await newRequest();
 
@@ -194,6 +204,15 @@ const getChasisNumber = async() => {
     let parentChasisDiv = matchingChasisElement.parentElement;
     let vehicleChasis = parentChasisDiv.nextElementSibling.textContent;
     return vehicleChasis.trim();
+};
+const getSerieNumber = async() => {
+
+    /* Get the Serie number of the vehicle */
+    let serieXpath = "//label[text()='Número de serie:']";
+    let matchingSerieElement = document.evaluate(serieXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    let parentSerieDiv = matchingSerieElement.parentElement;
+    let vehicleSerie = parentSerieDiv.nextElementSibling.textContent;
+    return vehicleSerie.trim();
 };
 const getPlateDate = async() => {
 
