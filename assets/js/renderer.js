@@ -179,6 +179,18 @@ function logout() {
             localStorage.clear();
             $('#login-container').css("display", "flex");
             $('#form-container').hide();
+            $('#progress-bar').show();
+            $('#initial-form').css('display', 'flex');
+            $('#status-report').html('');
+            $('#status-report').hide();
+            $('#failed-revisions').hide();
+            $('#runt-webview').hide();
+            $('#sicre-webview').hide();
+            $('#runt-step').removeClass('done');
+            $('#sicre-step').removeClass('done');
+            $('#runt-step').removeClass('current');
+            $('#sicre-step').removeClass('current');
+            $('#initial-step').addClass('current').removeClass('done');
         }
     });
 
@@ -304,6 +316,8 @@ function showInitialForm() {
     $('#sicre-webview').hide();
     $('#runt-step').removeClass('done');
     $('#sicre-step').removeClass('done');
+    $('#runt-step').removeClass('current');
+    $('#sicre-step').removeClass('current');
     $('#initial-step').addClass('current').removeClass('done');
 }
 
