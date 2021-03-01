@@ -11,7 +11,10 @@ const sicreWebview = document.getElementById('sicre-webview');
 const fs = require('fs');
 
 let currentSicreState;
-
+const data = fs.readFileSync('settings/settings.json');
+const json = data.toString('utf8');
+settings = JSON.parse(json);
+$('#sicre-webview').attr('src', settings.SICRE_URL);
 /* Capture navigation events */
 sicreWebview.addEventListener('did-stop-loading', (event) => {
     if (currentSicreState == 'login') {
@@ -82,10 +85,7 @@ sicreWebview.addEventListener('did-navigate', (event) => {
                 $('#status-report').html('');
                 $('#status-report').hide();
             }, 3000);
-            const data = fs.readFileSync('settings/settings.json');
-            const json = data.toString('utf8');
-            settings = JSON.parse(json);
-            $('#sicre-webview').attr('src', settings.SICRE_URL);
+
             $('#runt-step').removeClass('done');
             $('#initial-step').addClass('current').removeClass('done');
             $('#sicre-webview').hide();
@@ -296,8 +296,15 @@ function selectRevision(id) {
 
 function showInitialForm() {
     $('#initial-form').css('display', 'flex');
+    $('#status-report').html('');
+    $('#status-report').hide();
     $('#progress-bar').show();
     $('#failed-revisions').hide();
+    $('#runt-webview').hide();
+    $('#sicre-webview').hide();
+    $('#runt-step').removeClass('done');
+    $('#sicre-step').removeClass('done');
+    $('#initial-step').addClass('current').removeClass('done');
 }
 
 function showFailedRevisions() {
@@ -388,7 +395,7 @@ ipc.on('pinCreated', (event, props) => {
     localStorage.setItem('transaction-number', props.transactionNumber);
     Swal.fire({
         title: 'Pin generado!',
-        text: "Se ha generado el pin correctamente. ¿Desea continuar a SICRE?",
+        text: "Se ha generado el pin correctamente. ¿Desea continuar a SICOV?",
         icon: 'success',
         html: `
         <ul>
@@ -400,7 +407,7 @@ ipc.on('pinCreated', (event, props) => {
         showCancelButton: true,
         confirmButtonColor: '#79c5b4',
         cancelButtonColor: '#e88aa2',
-        confirmButtonText: 'Continuar a SICRE',
+        confirmButtonText: 'Continuar a SICOV',
         cancelButtonText: 'Cancelar'
     }).then(async(result) => {
         if (result.isConfirmed) {
@@ -455,10 +462,17 @@ ipc.on('loadingPinInfo', (event, props) => {
 
 
 const submitData = async(data) => {
-    $('#status-report').show();
-    $('#status-report').html('');
-    var statusContent = '<span>Sincronizando información</span>';
-    $('#status-report').append(statusContent);
+
+    //Get Settings
+    const settingsData = fs.readFileSync('settings/settings.json');
+    const json = settingsData.toString('utf8');
+    settings = JSON.parse(json);
+    console.log(settings.SICRE_URL);
+
+    // $('#status-report').show();
+    // $('#status-report').html('');
+    // var statusContent = '<span>Sincronizando información</span>';
+    // $('#status-report').append(statusContent);
     const plate = localStorage.getItem('plate');
     const formData = {
         parametro: {
@@ -496,24 +510,24 @@ const submitData = async(data) => {
         contentType: 'application/json',
         dataType: 'json',
         error: (request, status, error) => {
-            $('#status-report').show();
-            $('#status-report').html('');
-            var statusContent = '<span>Error sincronizando Información</span>';
-            $('#status-report').append(statusContent);
-            setTimeout(() => {
-                $('#status-report').html('');
-                $('#status-report').hide();
-            }, 3000);
+            // $('#status-report').show();
+            // $('#status-report').html('');
+            // var statusContent = '<span>Error sincronizando Información</span>';
+            // $('#status-report').append(statusContent);
+            // setTimeout(() => {
+            //     $('#status-report').html('');
+            //     $('#status-report').hide();
+            // }, 3000);
         },
         success: (response, status, jqXHQ) => {
-            $('#status-report').show();
-            $('#status-report').html('');
-            var statusContent = '<span>Información sincronizada exitosamente</span>';
-            $('#status-report').append(statusContent);
-            setTimeout(() => {
-                $('#status-report').html('');
-                $('#status-report').hide();
-            }, 3000);
+            // $('#status-report').show();
+            // $('#status-report').html('');
+            // var statusContent = '<span>Información sincronizada exitosamente</span>';
+            // $('#status-report').append(statusContent);
+            // setTimeout(() => {
+            //     $('#status-report').html('');
+            //     $('#status-report').hide();
+            // }, 3000);
         }
     });
 };
@@ -564,6 +578,7 @@ ipc.on('vehicleData', (event, props) => {
                     <li> Estado Soat: ${props.data.soat} </li>
                     <li> Estado Ultima Solicitud: ${props.data.lastRequest.lastRequestState}</li>
                     <li> Entidad Ultima Solicitud: ${props.data.lastRequest.lastRequestEntity}</li>
+                    <li> Fecha Ultima Solicitud: ${props.data.lastRequest.lastRequestDate}</li>
                 </ul>
                 `,
                 showCancelButton: true,
