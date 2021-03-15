@@ -19,6 +19,17 @@ ipc.on('start-login', async(event, props) => {
     }, 1000);
 });
 
+const logOut = async() => {
+    console.log('log out')
+    const logoutBtn = document.getElementById('ctl00_LoginView1_LoginStatus1');
+    console.log(logoutBtn);
+    logoutBtn.click();
+}
+ipc.on('logOut', async(event, props) => {
+    console.log('on log out')
+    await logOut();
+});
+
 ipc.on('input-form-data', async(event, props) => {
     console.log('inputttt', props);
     const documentType = localStorage.getItem('documentType');
@@ -55,8 +66,9 @@ ipc.on('enter-plate', async(event, props) => {
 const addMakeRevisionListener = async() => {
     setTimeout(() => {
         $('#ctl00_body_btnFormalizarRevision').on('click', () => {
-            console.log('finish clicked');
-            ipc.sendTo(1, 'revision-finished', true);
+            setTimeout(() => {
+                ipc.sendTo(1, 'revision-finished', true);
+            }, 2000);
         });
 
     }, 2000);
@@ -72,10 +84,12 @@ const setPin = async(pin) => {
 };
 //
 const setPinValue = async(pinValue) => {
-    console.log(pinValue);
+    let pin = pinValue.replaceAll('.', '').trim();
+    console.log(pin);
     setTimeout(() => {
         const pinValueInput = $('#ctl00_body_txtValorDePin');
-        pinValueInput.val(pinValue);
+        console.log(pinValueInput);
+        pinValueInput.val(pin);
     }, 1000);
 };
 //

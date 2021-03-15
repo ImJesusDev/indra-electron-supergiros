@@ -7,14 +7,11 @@ const runtWebview = document.getElementById('runt-webview');
 const moment = require('moment');
 /* Sicre */
 const sicreWebview = document.getElementById('sicre-webview');
-/* File system */
-const fs = require('fs');
+const log = require('electron-log');
+
 
 let currentSicreState;
-const data = fs.readFileSync('settings/settings.json');
-const json = data.toString('utf8');
-settings = JSON.parse(json);
-$('#sicre-webview').attr('src', settings.SICRE_URL);
+
 /* Capture navigation events */
 sicreWebview.addEventListener('did-stop-loading', (event) => {
     if (currentSicreState == 'login') {
@@ -25,7 +22,6 @@ sicreWebview.addEventListener('did-stop-loading', (event) => {
             'username': username,
             'password': password
         };
-        sicreWebview.send('start-login', data);
     }
     if (currentSicreState == 'enter-plate') {
         const plate = localStorage.getItem('plate');
@@ -53,7 +49,7 @@ sicreWebview.addEventListener('did-stop-loading', (event) => {
 
 ipc.on('info-entered', (event, props) => {
     $('#status-report').html('');
-    var statusContent = '<span>Por favor, verifique la información, y haga click en Formalizar Revisión!</span>';
+    var statusContent = '<span>Por favor, verifique la información y haga click en "Formalizar revisión"</span>';
     $('#status-report').append(statusContent);
     $('#status-report').show();
 });
@@ -64,10 +60,14 @@ sicreWebview.addEventListener('did-navigate', (event) => {
         console.log('here');
         currentSicreState = 'login';
     } else if (event.url.indexOf('SeleccionarSucursal') >= 0) {
+        $('#status-report').html('');
+        var statusContent = '<span>Por favor seleccione la sucursal</span>';
+        $('#status-report').append(statusContent);
+        $('#status-report').show();
         sicreWebview.send('sucursal-selection', true);
     } else if (event.url.indexOf('?Placa') >= 0) {
         $('#status-report').html('');
-        var statusContent = '<span>Ingresando Información!</span>';
+        var statusContent = '<span>Ingresando información!</span>';
         $('#status-report').append(statusContent);
         $('#status-report').show();
         sicreWebview.send('input-form-data', true);
@@ -79,7 +79,7 @@ sicreWebview.addEventListener('did-navigate', (event) => {
             console.log('finished by url');
             $('#status-report').show();
             $('#status-report').html('');
-            var statusContent = '<span>Formalizacion realizada!</span>';
+            var statusContent = '<span>¡Formalización realizada!</span>';
             $('#status-report').append(statusContent);
             setTimeout(() => {
                 $('#status-report').html('');
@@ -126,7 +126,9 @@ function goToRunt() {
 function sicovInputChange() {
     const sicovUsername = $('#sicov-username');
     const sicovPassword = $('#sicov-password');
-    if (sicovUsername.val() && sicovPassword.val()) {
+    const sicovUrl = $('#sicov-url');
+    const syncUrl = $('#sync-url');
+    if (sicovUsername.val() && sicovPassword.val() && sicovUrl.val() && syncUrl.val()) {
         $('#sicov-btn-disabled').hide();
         $('#sicov-btn-enabled').show();
     }
@@ -191,9 +193,49 @@ function logout() {
             $('#runt-step').removeClass('current');
             $('#sicre-step').removeClass('current');
             $('#initial-step').addClass('current').removeClass('done');
+            sicreWebview.send('logOut', true);
         }
     });
 
+
+
+
+}
+
+function validateFields() {
+    const plate = $('#vehicle-plate');
+    const documentNumber = $('#document-number');
+    const documentType = $('#document-type');
+    const cellphone = $('#cellphone');
+    const revisionType = $('#revision-type');
+    const vehicleType = $('#vehicle-type-select');
+    if (!plate.val()) {
+        plate.focus();
+        return false;
+    }
+    if (!documentType.val()) {
+        $('#document-type').focus();
+        return false;
+    }
+    if (!documentNumber.val()) {
+        documentNumber.focus();
+        return false;
+    }
+
+
+    if (!cellphone.val()) {
+        cellphone.focus();
+        return false;
+    }
+    if (!revisionType.val()) {
+        $('#revision-type').focus();
+        return false;
+    }
+
+    if (!vehicleType.val()) {
+        vehicleType.focus();
+        return false;
+    }
 
 
 
@@ -206,6 +248,11 @@ function showForm() {
     $('#status-report').show();
     const sicovUsername = $('#sicov-username');
     const sicovPassword = $('#sicov-password');
+    const sicovUrl = $('#sicov-url');
+    const syncUrl = $('#sync-url');
+    localStorage.setItem('sicov-url', sicovUrl.val());
+    localStorage.setItem('sync-url', syncUrl.val());
+    $('#sicre-webview').attr('src', sicovUrl.val());
     formData = new FormData();
     formData.append('username', sicovUsername.val());
     formData.append('password', sicovPassword.val());
@@ -218,8 +265,8 @@ function showForm() {
     localStorage.setItem('sicov-username', sicovUsername.val());
     localStorage.setItem('sicov-password', sicovPassword.val());
     // localStorage.setItem('auth-token', response.token);
-    const sicreUrl = localStorage.getItem('sicre-url');
-    $('#sicre-webview').attr('src', sicreUrl);
+    // const sicreUrl = localStorage.getItem('sicre-url');
+    // $('#sicre-webview').attr('src', sicreUrl);
 
 
 }
@@ -306,7 +353,36 @@ function selectRevision(id) {
 
 }
 
+function showRunt() {
+    $('#initial-form').css('display', 'none');
+    $('#sicre-webview').hide();
+    $('#runt-step').addClass('current');
+    $('#sicre-step').removeClass('current');
+    $('#runt-webview').show();
+}
+
+function showSicov() {
+    $('#initial-form').css('display', 'none');
+    $('#paynet-webview').hide();
+    $('#runt-webview').hide();
+    $('#runt-step').removeClass('current');
+    $('#sicre-step').addClass('current');
+    $('#sicre-webview').show();
+}
+
+function resetForm() {
+    $('#vehicle-plate').val('');
+    $('#document-number').val('');
+    $('#cellphone').val('');
+    $('#document-type').val('');
+    $('#revision-type').val('');
+    $('#vehicle-type-select').val('');
+
+}
+
 function showInitialForm() {
+    runtWebview.send('newRequest', true);
+    resetForm();
     $('#initial-form').css('display', 'flex');
     $('#status-report').html('');
     $('#status-report').hide();
@@ -371,6 +447,7 @@ setTimeout(async() => {
 
 ipc.on('revision-finished', (event, props) => {
     console.log('finished');
+    sicreWebview.send('logOut', true);
     $('#status-report').show();
     $('#status-report').html('');
     var statusContent = '<span>Formalizacion realizada!</span>';
@@ -379,12 +456,15 @@ ipc.on('revision-finished', (event, props) => {
         $('#status-report').html('');
         $('#status-report').hide();
     }, 3000);
-    let url = localStorage.getItem('sicre-url');
-    $('#sicre-webview').attr('src', url);
+    // let url = localStorage.getItem('sicre-url');
+    // $('#sicre-webview').attr('src', url);
     $('#runt-step').removeClass('done');
+    $('#sicre-step').removeClass('done');
+    $('#sicre-step').removeClass('current');
     $('#initial-step').addClass('current').removeClass('done');
     $('#sicre-webview').hide();
     $('#initial-form').show();
+    resetForm();
 });
 
 
@@ -425,12 +505,20 @@ ipc.on('pinCreated', (event, props) => {
         cancelButtonText: 'Cancelar'
     }).then(async(result) => {
         if (result.isConfirmed) {
+
+            const username = localStorage.getItem('sicov-username');
+            const password = localStorage.getItem('sicov-password');
+            const data = {
+                'username': username,
+                'password': password
+            };
+            sicreWebview.send('start-login', data);
             // $('#status-report').show();
             // $('#status-report').html('');
             // var statusContent = '<span>Cargando SICRE</span>';
             // $('#status-report').append(statusContent);
             $('#status-report').html('');
-            var statusContent = '<span>Por favor seleccione la sucursal</span>';
+            var statusContent = '<span>Iniciando sesión.</span>';
             $('#status-report').append(statusContent);
             $('#status-report').show();
             $('#sicre-webview').show();
@@ -462,7 +550,7 @@ ipc.on('runt-error', (event, props) => {
 
 ipc.on('pinRedirect', (event, props) => {
     $('#status-report').html('');
-    var statusContent = '<span>Redireccionado a compra de PIN</span>';
+    var statusContent = '<span>Redireccionando a compra de PIN</span>';
     $('#status-report').append(statusContent);
 
 });
@@ -478,16 +566,19 @@ ipc.on('loadingPinInfo', (event, props) => {
 const submitData = async(data) => {
 
     //Get Settings
-    const settingsData = fs.readFileSync('settings/settings.json');
-    const json = settingsData.toString('utf8');
-    settings = JSON.parse(json);
-    console.log(settings.SICRE_URL);
+
+    let capacidadDeCarga = data.technicalData.totalPassengers ? data.technicalData.totalPassengers : "0";
+    capacidadDeCarga = capacidadDeCarga.replace(/[^0-9.,]+/, '');
+    const syncUrl = localStorage.getItem('sync-url');
+
+    // console.log(settings.SICRE_URL);
 
     // $('#status-report').show();
     // $('#status-report').html('');
     // var statusContent = '<span>Sincronizando información</span>';
     // $('#status-report').append(statusContent);
     const plate = localStorage.getItem('plate');
+    log.info(`Sincronizando placa: ${plate}`);
     const formData = {
         parametro: {
             "placa": plate,
@@ -507,7 +598,7 @@ const submitData = async(data) => {
             "Cilindraje": data.cylinderCapacity,
             "Combustible": data.fuelType,
             "FechaMatricula": moment(data.plateDate, "DD/MM/YYYY").format("YYYY-MM-DD"),
-            "CapacidadCarga": data.technicalData.totalLoad ? data.technicalData.totalLoad : "0",
+            "CapacidadCarga": capacidadDeCarga,
             "PesoBruto": data.technicalData.totalWeight,
             "CapacidadPasajeros": data.technicalData.totalPassengers ? data.technicalData.totalPassengers : "0",
             "CantEjes": data.technicalData.totalAxis,
@@ -516,14 +607,19 @@ const submitData = async(data) => {
         }
     };
     console.log(formData);
+    log.info(JSON.stringify(formData));
 
     $.ajax({
         type: "POST",
-        url: 'http://172.17.4.130:57209/rest/revisionesrestful/setInfoVehiculo',
+        url: syncUrl,
         data: JSON.stringify(formData),
         contentType: 'application/json',
         dataType: 'json',
+        timeout: 18000,
         error: (request, status, error) => {
+            log.warn('Error sincronizando');
+            log.warn(status);
+            log.warn(request.responseText);
             // $('#status-report').show();
             // $('#status-report').html('');
             // var statusContent = '<span>Error sincronizando Información</span>';
@@ -534,6 +630,8 @@ const submitData = async(data) => {
             // }, 3000);
         },
         success: (response, status, jqXHQ) => {
+            log.info('Información sincronizada');
+            log.info(JSON.stringify(response));
             // $('#status-report').show();
             // $('#status-report').html('');
             // var statusContent = '<span>Información sincronizada exitosamente</span>';
@@ -554,20 +652,22 @@ ipc.on('infoCompleted', (event, props) => {
 });
 ipc.on('nextPressed', (event, props) => {
     $('#status-report').html('');
-    $('#status-report').hide('');
+    var statusContent = '<span>Por favor espere...!</span>';
+    $('#status-report').append(statusContent);
+    $('#status-report').show('');
 });
 
 ipc.on('vehicleData', (event, props) => {
     if (props.type === 'vehicleInfo') {
         $('#status-report').show();
         $('#status-report').html('');
-        var statusContent = '<span>Consultando Informacion del Vehiculo!</span>';
+        var statusContent = '<span>Consultando información del vehículo</span>';
         localStorage.setItem('vehicle-model', props.data.model);
         $('#status-report').append(statusContent);
     }
     if (props.type === 'otherInfo') {
         $('#status-report').html('');
-        var statusContent = '<span>Consultando Informacion Adicional!</span>';
+        var statusContent = '<span>Consultando información adicional</span>';
         $('#status-report').append(statusContent);
     }
 
@@ -579,7 +679,7 @@ ipc.on('vehicleData', (event, props) => {
             $('#status-report').html('');
             $('#status-report').hide();
             Swal.fire({
-                title: 'Información obtenida!',
+                title: '¡Información obtenida!',
                 text: "Se ha consultado la información correctamente. ¿Desea continuar?",
                 icon: 'success',
                 html: `
@@ -587,12 +687,12 @@ ipc.on('vehicleData', (event, props) => {
                     <li> Marca: ${props.data.make} </li>
                     <li> Modelo: ${props.data.model} </li>
                     <li> Color: ${props.data.color}</li>
-                    <li> Linea:${props.data.line} </li>
-                    <li> Estado de Vehículo: ${props.data.state}</li>
+                    <li> Línea:${props.data.line} </li>
+                    <li> Estado del vehículo: ${props.data.state}</li>
                     <li> Estado Soat: ${props.data.soat} </li>
-                    <li> Estado Ultima Solicitud: ${props.data.lastRequest.lastRequestState}</li>
-                    <li> Entidad Ultima Solicitud: ${props.data.lastRequest.lastRequestEntity}</li>
-                    <li> Fecha Ultima Solicitud: ${props.data.lastRequest.lastRequestDate}</li>
+                    <li> Estado última solicitud: ${props.data.lastRequest.lastRequestState}</li>
+                    <li> Entidad última solicitud: ${props.data.lastRequest.lastRequestEntity}</li>
+                    <li> Fecha última solicitud: ${props.data.lastRequest.lastRequestDate}</li>
                 </ul>
                 `,
                 showCancelButton: true,
@@ -625,7 +725,16 @@ ipc.on('vehicleData', (event, props) => {
                     if (formValues && formValues.pin) {
                         localStorage.setItem('pin-number', formValues.pin);
                         $('#status-report').html('');
-                        var statusContent = '<span>Por favor seleccione la sucursal</span>';
+                        var statusContent = '<span>Iniciando sesión.</span>';
+
+                        const username = localStorage.getItem('sicov-username');
+                        const password = localStorage.getItem('sicov-password');
+                        const data = {
+                            'username': username,
+                            'password': password
+                        };
+                        sicreWebview.send('start-login', data);
+
                         $('#status-report').append(statusContent);
                         $('#status-report').show();
                         $('#runt-webview').hide();
