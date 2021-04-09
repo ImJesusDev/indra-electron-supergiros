@@ -7,6 +7,9 @@ const runtWebview = document.getElementById("runt-webview");
 const moment = require("moment");
 /* Sicre */
 const sicreWebview = document.getElementById("sicre-webview");
+/* Crypto */
+var CryptoJS = require("crypto-js");
+const secretKey = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 const log = require("electron-log");
 
 let currentSicreState;
@@ -17,9 +20,11 @@ sicreWebview.addEventListener("did-stop-loading", (event) => {
     console.log("login");
     const username = localStorage.getItem("sicov-username");
     const password = localStorage.getItem("sicov-password");
+    let bytes = CryptoJS.AES.decrypt(password, secretKey);
+    let descryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
     const data = {
       username: username,
-      password: password,
+      password: descryptedPassword,
     };
   }
   if (currentSicreState == "enter-plate") {
@@ -45,7 +50,14 @@ sicreWebview.addEventListener("did-stop-loading", (event) => {
     currentSicreState = "plate-entered";
   }
 });
-
+const togglePassword = (value) => {
+  if (value === "sicov") {
+    const sicovPassword = $("#sicov-password");
+    sicovPassword.attr("type") === "password"
+      ? sicovPassword.attr("type", "text")
+      : sicovPassword.attr("type", "password");
+  }
+};
 ipc.on("info-entered", (event, props) => {
   $("#status-report").html("");
   var statusContent =
@@ -53,7 +65,22 @@ ipc.on("info-entered", (event, props) => {
   $("#status-report").append(statusContent);
   $("#status-report").show();
 });
+ipc.on("openConsole", (event, props) => {
+  switch (props.platform) {
+    case "RUNT":
+      runtWebview.openDevTools();
+      break;
+    case "PAYNET":
+      paynetWebview.openDevTools();
+      break;
+    case "SICOV":
+      sicreWebview.openDevTools();
+      break;
 
+    default:
+      break;
+  }
+});
 sicreWebview.addEventListener("did-navigate", (event) => {
   console.log("did-navigate", event.url);
   if (event.url.indexOf("Default") >= 0) {
@@ -95,35 +122,42 @@ sicreWebview.addEventListener("did-navigate", (event) => {
 });
 
 function goToRunt() {
-  $("#initial-form").hide();
-  $("#runt-webview").show();
-  $("html,body").scrollTop(0);
-  $("#initial-step").removeClass("current").addClass("done");
-  $("#runt-step").addClass("current");
-  /* Store the value of the selected vehicle type */
-  const plate = $("#vehicle-plate");
-  const foreignVehicle = $(
-    "input[name=foreign-vehicle]:checked",
-    "#revision-form"
+  $("#runt-webview").attr(
+    "src",
+    "https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"
   );
-  const documentNumber = $("#document-number");
-  const documentType = $("#document-type");
-  const cellphone = $("#cellphone");
-  const revisionType = $("#revision-type");
-  const vehicleType = $("#vehicle-type-select");
-  localStorage.setItem("vehicle-type", vehicleType.val());
-  localStorage.setItem("foreign-vehicle", foreignVehicle.val());
-  localStorage.setItem("plate", plate.val());
-  localStorage.setItem("document-number", documentNumber.val());
-  localStorage.setItem("document-type", documentType.val());
-  localStorage.setItem("cellphone", cellphone.val());
-  localStorage.setItem("revision-type", revisionType.val());
-  const formData = {
-    plate: plate.val(),
-    documentType: documentType.val(),
-    documentNumber: documentNumber.val(),
-  };
-  runtWebview.send("runt-form-data", formData);
+  setTimeout(() => {
+    $("#initial-form").hide();
+    $("#runt-webview").show();
+    $("html,body").scrollTop(0);
+    $("#initial-step").removeClass("current").addClass("done");
+    $("#runt-step").addClass("current");
+    /* Store the value of the selected vehicle type */
+    const plate = $("#vehicle-plate").val();
+    const foreignVehicle = $(
+      "input[name=foreign-vehicle]:checked",
+      "#revision-form"
+    );
+    const documentNumber = $("#document-number");
+    const documentType = $("#document-type");
+    const cellphone = $("#cellphone");
+    const revisionType = $("#revision-type");
+    const vehicleType = $("#vehicle-type-select");
+    localStorage.setItem("vehicle-type", vehicleType.val());
+    localStorage.setItem("foreign-vehicle", foreignVehicle.val());
+    localStorage.setItem("plate", plate.toUpperCase());
+    localStorage.setItem("document-number", documentNumber.val());
+    localStorage.setItem("document-type", documentType.val());
+    localStorage.setItem("cellphone", cellphone.val());
+    localStorage.setItem("revision-type", revisionType.val());
+    const formData = {
+      plate: plate.toUpperCase(),
+      documentType: documentType.val(),
+      documentNumber: documentNumber.val(),
+      procedencia: foreignVehicle.val(),
+    };
+    runtWebview.send("runt-form-data", formData);
+  }, 1000);
 }
 
 function sicovInputChange() {
@@ -192,7 +226,13 @@ function logout() {
     cancelButtonText: "Cancelar",
   }).then(async (result) => {
     if (result.isConfirmed) {
+      let sicovUsername = localStorage.getItem("sicov-username");
+      let savedSicovUrl = localStorage.getItem("sicov-url");
+      let savedSyncUrl = localStorage.getItem("sync-url");
       localStorage.clear();
+      localStorage.setItem("sicov-username", sicovUsername);
+      localStorage.setItem("sicov-url", savedSicovUrl);
+      localStorage.setItem("sync-url", savedSyncUrl);
       $("#login-container").css("display", "flex");
       $("#form-container").hide();
       $("#progress-bar").show();
@@ -207,6 +247,7 @@ function logout() {
       $("#runt-step").removeClass("current");
       $("#sicre-step").removeClass("current");
       $("#initial-step").addClass("current").removeClass("done");
+      $("#sicov-password").val("");
       sicreWebview.send("logOut", true);
     }
   });
@@ -269,7 +310,11 @@ function showForm() {
 
   $("#header-user").text(sicovUsername.val());
   localStorage.setItem("sicov-username", sicovUsername.val());
-  localStorage.setItem("sicov-password", sicovPassword.val());
+  let encryptedSicovPassword = CryptoJS.AES.encrypt(
+    sicovPassword.val(),
+    secretKey
+  ).toString();
+  localStorage.setItem("sicov-password", encryptedSicovPassword);
   // localStorage.setItem('auth-token', response.token);
   // const sicreUrl = localStorage.getItem('sicre-url');
   // $('#sicre-webview').attr('src', sicreUrl);
@@ -358,6 +403,10 @@ function selectRevision(id) {
 }
 
 function showRunt() {
+  $("#runt-webview").attr(
+    "src",
+    "https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"
+  );
   $("#initial-form").css("display", "none");
   $("#sicre-webview").hide();
   $("#runt-step").addClass("current");
@@ -379,7 +428,7 @@ function resetForm() {
   $("#document-number").val("");
   $("#cellphone").val("");
   $("#document-type").val("");
-  $("#revision-type").val("");
+  $("#revision-type").val("70");
   $("#vehicle-type-select").val("");
 }
 
@@ -451,7 +500,7 @@ ipc.on("revision-finished", (event, props) => {
   sicreWebview.send("logOut", true);
   $("#status-report").show();
   $("#status-report").html("");
-  var statusContent = "<span>Formalizacion realizada!</span>";
+  var statusContent = "<span>¡Formalizacion realizada!</span>";
   $("#status-report").append(statusContent);
   setTimeout(() => {
     $("#status-report").html("");
@@ -508,10 +557,13 @@ ipc.on("pinCreated", (event, props) => {
     if (result.isConfirmed) {
       const username = localStorage.getItem("sicov-username");
       const password = localStorage.getItem("sicov-password");
+      let bytes = CryptoJS.AES.decrypt(password, secretKey);
+      let descryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
       const data = {
         username: username,
-        password: password,
+        password: descryptedPassword,
       };
+      log.info("[SICOV] Iniciando sesión");
       sicreWebview.send("start-login", data);
       // $('#status-report').show();
       // $('#status-report').html('');
@@ -648,12 +700,12 @@ const submitData = async (data) => {
 ipc.on("infoCompleted", (event, props) => {
   $("#status-report").html("");
   var statusContent =
-    '<span>Información completada, presione el botón "Siguiente"...</span>';
+    '<span>Información completada, presione el botón "Siguiente"</span>';
   $("#status-report").append(statusContent);
 });
 ipc.on("nextPressed", (event, props) => {
   $("#status-report").html("");
-  var statusContent = "<span>Por favor espere...!</span>";
+  var statusContent = "<span>Por favor espere...</span>";
   $("#status-report").append(statusContent);
   $("#status-report").show("");
 });
@@ -704,7 +756,7 @@ ipc.on("vehicleData", (event, props) => {
                     <li> Fecha vigencia: ${
                       props.data.certifications.expiration
                     } </li>
-                    <li> Ultima solicitud: ${props.data.lastRequest.type}</li>
+                    <li> Última solicitud: ${props.data.lastRequest.type}</li>
                     <li> Estado última solicitud: ${
                       props.data.lastRequest.lastRequestState
                     }</li>

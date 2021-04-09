@@ -277,15 +277,21 @@
     margin-bottom: 10px;
     padding: 5px 0;
 }
-
+.view-icon {
+    width: 20px;
+    cursor: pointer;
+    margin-left: 5px;
+    top: 7px;
+    right: 5px;
+}
 #status-report {
     display: none;
     justify-content: center;
     align-items: center;
     width: 50%;
     padding: 1rem;
-    position: absolute;
-    top: 20%;
+    position: fixed;
+    top: 25%;
     /* border: solid 1px black; */
     background-color: var(--primary-yellow);
     color: var(--primary-dark);

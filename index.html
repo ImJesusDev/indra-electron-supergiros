@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title> INDRA </title>
+    <title> Conecta SICOV </title>
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
     <link rel="stylesheet" href="assets/css/styles.css" />
@@ -47,6 +47,7 @@
                     <!-- Description -->
                     <div class="description">
                         <p>Centro de diagnóstico automotor
+                            <span class="font-bold" id="version"></span>
                         </p>
                     </div>
                     <!-- Description -->
@@ -74,10 +75,13 @@
 
                     <!-- Sicov Password -->
                     <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold " for="password">
+                        <label class="block text-gray-700 flex mr-4 text-sm font-bold " for="password">
                             Password SICOV
                         </label>
-                        <input value="" onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sicov-password" type="password" placeholder="Password SICOV">
+                        <div class="relative">
+                            <input value="" onkeyup="sicovInputChange()" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sicov-password" type="password" placeholder="Password SICOV">
+                            <img onmouseover="togglePassword('sicov')" onmouseout="togglePassword('sicov')"  src="assets/images/view.svg"  class="view-icon absolute" title="Mostrar clave" alt="Mostrar">
+                        </div>
                     </div>
                     <!-- Sicov Password -->
 
@@ -182,14 +186,14 @@
                     </div>
                     <div>
                         <div class="is-dirty mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input required value="" onkeyup="initialFormChange()" class="mdl-textfield__input" type="text" id="document-number">
+                            <input required value="" onkeyup="initialFormChange()" class="mdl-textfield__input" type="number" id="document-number">
                             <label class="mdl-textfield__label" for="document-number">Número de documento *</label>
                         </div>
                     </div>
 
                     <div>
                         <div class="is-dirty mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input required value="" onkeyup="initialFormChange()" class="mdl-textfield__input" type="text" id="cellphone">
+                            <input required value="" onkeyup="initialFormChange()" class="mdl-textfield__input" type="number" id="cellphone">
                             <label class="mdl-textfield__label" for="cellphone">Celular *</label>
                         </div>
                     </div>
@@ -261,6 +265,7 @@
                     <form class="">
                         <div class="form-title">
                             <h1>Reiniciar Revisión</h1>
+                            <span id="version-form"></span>
                         </div>
 
                         <div>
@@ -481,6 +486,9 @@
 
     <!-- Manage Updated -->
     <script>
+        const {version} = require('./package.json');
+        document.querySelector('#version').textContent = `version ${version}`;
+        document.querySelector('#version-form').textContent = `version ${version}`;
         const {
             ipcRenderer
         } = require('electron');
