@@ -45,12 +45,6 @@ const template = [
         },
       },
       {
-        label: "Consola PAYNET",
-        click: async () => {
-          win.webContents.send("openConsole", { platform: "PAYNET" });
-        },
-      },
-      {
         label: "Consola SICOV",
         click: async () => {
           win.webContents.send("openConsole", { platform: "SICOV" });

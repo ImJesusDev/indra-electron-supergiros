@@ -802,9 +802,11 @@ ipc.on("vehicleData", (event, props) => {
 
             const username = localStorage.getItem("sicov-username");
             const password = localStorage.getItem("sicov-password");
+            let bytes = CryptoJS.AES.decrypt(password, secretKey);
+            let descryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
             const data = {
               username: username,
-              password: password,
+              password: descryptedPassword,
             };
             sicreWebview.send("start-login", data);
             log.info("[SICOV] Iniciando sesión");
