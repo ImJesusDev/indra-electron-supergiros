@@ -88,7 +88,7 @@ sicreWebview.addEventListener("did-navigate", (event) => {
     currentSicreState = "login";
   } else if (event.url.indexOf("SeleccionarSucursal") >= 0) {
     $("#status-report").html("");
-    var statusContent = "<span>Por favor seleccione la sucursal</span>";
+    var statusContent = "<span>Por favor, seleccione la sucursal</span>";
     $("#status-report").append(statusContent);
     $("#status-report").show();
     sicreWebview.send("sucursal-selection", true);
@@ -435,6 +435,8 @@ function resetForm() {
 function showInitialForm() {
   runtWebview.send("newRequest", true);
   resetForm();
+  log.info("Cerrando sesión SICOV");
+  sicreWebview.send("logOut", true);
   $("#initial-form").css("display", "flex");
   $("#status-report").html("");
   $("#status-report").hide();
@@ -581,10 +583,12 @@ ipc.on("pinCreated", (event, props) => {
 });
 
 ipc.on("runt-error", (event, props) => {
+  let msg = props.message;
+
   Swal.fire({
     icon: "error",
     title: "Error",
-    text: "Ha ocurrido un error.",
+    text: `Ha ocurrido un error: ${msg}`,
     confirmButtonText: "Reintentar",
   }).then(async () => {
     $("#status-report").html("");
@@ -776,7 +780,7 @@ ipc.on("vehicleData", (event, props) => {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const { value: formValues } = await Swal.fire({
-            title: "Por favor, ingresa el pin de Supergiros para continuar..",
+            title: "Por favor, ingresa el pin de Supergiros para continuar...",
             html: `
                         <div class="w-full">
                             <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">

@@ -6,7 +6,7 @@ const userAgent =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15";
 console.log("user agent: ", userAgent);
 const filter = {
-  urls: ["https://*.runt.com.co/*"],
+  urls: ["https://*/*"],
 };
 let win;
 const isMac = process.platform === "darwin";
@@ -84,11 +84,13 @@ app
   .then(() => {
     console.log("Checking for updates");
     autoUpdater.checkForUpdatesAndNotify();
+    const userAgent =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36";
     session.defaultSession.webRequest.onBeforeSendHeaders(
-      filter,
       (details, callback) => {
-        details.requestHeaders["User-Agent"] = userAgent;
-        callback({ requestHeaders: details.requestHeaders });
+        details.requestHeaders["userAgent"] = userAgent;
+        ``;
+        callback({ cancel: false, requestHeaders: details.requestHeaders });
       }
     );
   });
