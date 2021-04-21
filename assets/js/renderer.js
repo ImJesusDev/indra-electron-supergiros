@@ -61,7 +61,7 @@ const togglePassword = (value) => {
 ipc.on("info-entered", (event, props) => {
   $("#status-report").html("");
   var statusContent =
-    '<span>Por favor, verifique la información y haga click en "Formalizar revisión"</span>';
+    '<span>Verifica la información y da clic en "Formalizar revisión"</span>';
   $("#status-report").append(statusContent);
   $("#status-report").show();
 });
@@ -88,7 +88,8 @@ sicreWebview.addEventListener("did-navigate", (event) => {
     currentSicreState = "login";
   } else if (event.url.indexOf("SeleccionarSucursal") >= 0) {
     $("#status-report").html("");
-    var statusContent = "<span>Por favor, seleccione la sucursal</span>";
+    var statusContent =
+      "<span>Selecciona la sucursal a la cual pertenezcas</span>";
     $("#status-report").append(statusContent);
     $("#status-report").show();
     sicreWebview.send("sucursal-selection", true);
@@ -572,7 +573,7 @@ ipc.on("pinCreated", (event, props) => {
       // var statusContent = '<span>Cargando SICRE</span>';
       // $('#status-report').append(statusContent);
       $("#status-report").html("");
-      var statusContent = "<span>Iniciando sesión.</span>";
+      var statusContent = "<span>Iniciando sesión</span>";
       $("#status-report").append(statusContent);
       $("#status-report").show();
       $("#sicre-webview").show();
@@ -780,7 +781,7 @@ ipc.on("vehicleData", (event, props) => {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const { value: formValues } = await Swal.fire({
-            title: "Por favor, ingresa el pin de Supergiros para continuar...",
+            title: "Por favor, ingresa el pin de Supergiros para continuar",
             html: `
                         <div class="w-full">
                             <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
@@ -802,7 +803,7 @@ ipc.on("vehicleData", (event, props) => {
           if (formValues && formValues.pin) {
             localStorage.setItem("pin-number", formValues.pin);
             $("#status-report").html("");
-            var statusContent = "<span>Iniciando sesión.</span>";
+            var statusContent = "<span>Iniciando sesión</span>";
 
             const username = localStorage.getItem("sicov-username");
             const password = localStorage.getItem("sicov-password");
