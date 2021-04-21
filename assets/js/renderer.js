@@ -104,20 +104,19 @@ sicreWebview.addEventListener("did-navigate", (event) => {
       currentSicreState = "enter-plate";
     } else {
       // Revision finished
-      console.log("finished by url");
-      $("#status-report").show();
-      $("#status-report").html("");
-      var statusContent = "<span>¡Formalización realizada!</span>";
-      $("#status-report").append(statusContent);
-      setTimeout(() => {
-        $("#status-report").html("");
-        $("#status-report").hide();
-      }, 3000);
-
-      $("#runt-step").removeClass("done");
-      $("#initial-step").addClass("current").removeClass("done");
-      $("#sicre-webview").hide();
-      $("#initial-form").show();
+      // console.log("finished by url");
+      // $("#status-report").show();
+      // $("#status-report").html("");
+      // var statusContent = "<span>¡Formalización realizada!</span>";
+      // $("#status-report").append(statusContent);
+      // setTimeout(() => {
+      //   $("#status-report").html("");
+      //   $("#status-report").hide();
+      // }, 3000);
+      // $("#runt-step").removeClass("done");
+      // $("#initial-step").addClass("current").removeClass("done");
+      // $("#sicre-webview").hide();
+      // $("#initial-form").show();
     }
   }
 });
@@ -662,6 +661,12 @@ const submitData = async (data) => {
       CantEjes: data.technicalData.totalAxis,
       Blindado: data.armoredInfo.isArmored,
       NivelBlindaje: data.armoredInfo.armorLevel,
+      FechaSoat: data.soat.date,
+      NumeroPoliza: data.soat.noPoliza,
+      TipoCarroceria: data.tipoCarroceria,
+      AutoridadTransito: data.organismoTransito,
+      ClasicoAntiguo: data.clasicoAntiguo,
+      CantPuertas: data.puertas,
     },
   };
   console.log(formData);
