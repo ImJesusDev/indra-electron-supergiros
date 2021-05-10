@@ -12,11 +12,7 @@ const sicreWebview = document.getElementById("sicre-webview");
 /* Crypto */
 var CryptoJS = require("crypto-js");
 const secretKey = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-/* File system */
-const fs = require("fs");
-const configData = fs.readFileSync("settings/settings.json");
-const json = configData.toString("utf8");
-const settings = JSON.parse(json);
+
 const log = require("electron-log");
 
 let currentSicreState;
@@ -173,16 +169,21 @@ function goToRunt() {
 function sicovInputChange() {
   const sicovUsername = $("#sicov-username");
   const sicovPassword = $("#sicov-password");
-  const sicovUrl = $("#sicov-url");
-  const syncUrl = $("#sync-url");
+  let savedSicovUrl = localStorage.getItem("sicov-url");
+  let savedSyncUrl = localStorage.getItem("sync-url");
+  let savedCdaId = localStorage.getItem("id-cda");
   if (
     sicovUsername.val() &&
     sicovPassword.val() &&
-    sicovUrl.val() &&
-    syncUrl.val()
+    savedSicovUrl &&
+    savedSyncUrl &&
+    savedCdaId
   ) {
     $("#sicov-btn-disabled").hide();
     $("#sicov-btn-enabled").show();
+  } else {
+    $("#sicov-btn-enabled").hide();
+    $("#sicov-btn-disabled").show();
   }
 }
 
@@ -306,11 +307,9 @@ function showForm() {
   $("#status-report").show();
   const sicovUsername = $("#sicov-username");
   const sicovPassword = $("#sicov-password");
-  const sicovUrl = $("#sicov-url");
-  const syncUrl = $("#sync-url");
-  localStorage.setItem("sicov-url", sicovUrl.val());
-  localStorage.setItem("sync-url", syncUrl.val());
-  $("#sicre-webview").attr("src", sicovUrl.val());
+
+  let savedSicovUrl = localStorage.getItem("sicov-url");
+  $("#sicre-webview").attr("src", savedSicovUrl);
   formData = new FormData();
   formData.append("username", sicovUsername.val());
   formData.append("password", sicovPassword.val());
@@ -629,11 +628,12 @@ ipc.on("loadingPinInfo", (event, props) => {
   $("#status-report").html("");
   $("#status-report").show();
   var statusContent =
-    "<span>Ingresando información, por favor espere...</span>";
+    "<span>Ingresando información, por favor espera...</span>";
   $("#status-report").append(statusContent);
 });
 const logUser = async (username) => {
   const syncUrl = localStorage.getItem("sync-url");
+  let savedCdaId = localStorage.getItem("id-cda");
   log.info(`[SICRE] setLogUsuario ${username}`);
   let ip = "0.0.0.0";
   try {
@@ -644,7 +644,7 @@ const logUser = async (username) => {
   }
   const formData = {
     parametro: {
-      ID_CDA: settings.ID_CDA,
+      ID_CDA: savedCdaId,
       NombreUsuario: username,
       FechaIngreso: new Date(),
       NombreAplicacion: "ConectaSicov",
@@ -757,7 +757,7 @@ ipc.on("infoCompleted", (event, props) => {
 });
 ipc.on("nextPressed", (event, props) => {
   $("#status-report").html("");
-  var statusContent = "<span>Por favor espere...</span>";
+  var statusContent = "<span>Por favor espera...</span>";
   $("#status-report").append(statusContent);
   $("#status-report").show("");
 });
@@ -796,6 +796,9 @@ ipc.on("vehicleData", (event, props) => {
                     <li> Licencia:${props.data.license} </li>
                     <li> Estado del vehículo: ${props.data.state}</li>
                     <li> Estado Soat: ${props.data.soat} </li>
+                    <li> Fecha fin de vigencia Soat: ${
+                      props.data.soat.date
+                    } </li>
                     <li> Último certificado: ${
                       props.data.certifications.type
                     } </li>
@@ -875,24 +878,107 @@ ipc.on("vehicleData", (event, props) => {
       });
     }, 1500);
   }
-
-  // Swal.fire({
-  //     title: 'Información obtenida!',
-  //     text: 'Se ha consultado la informacion correctamente',
-  //     html: `
-  //         <ul>
-  //             <li> Marca: ${props.make} </li>
-  //             <li> Modelo: ${props.model} </li>
-  //             <li> Color: ${props.color}</li>
-  //             <li> Linea:${props.line} </li>
-  //             <li> Estado de Vehiculo: ${props.state}</li>
-  //             <li> Estado Soat: ${props.soatState} </li>
-  //             <li> Estado Ultima Solicitud: ${props.lastRequestState}</li>
-  //             <li> Entidad Ultima Solicitud: ${props.lastRequestEntity}</li>
-  //         </ul>
-  //     `,
-  //     icon: 'success'
-  // });
-
-  // $('#form-container').show();
 });
+
+async function openSettings() {
+  const { value: formValues } = await Swal.fire({
+    title: "Ingresa la contraseña",
+    html: `
+        <div class="w-full">
+            <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                        Clave
+                    </label>
+                    <input value="" required id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+                </div>
+            </form>
+        </div>`,
+    focusConfirm: false,
+    cancelButtonText: "Cancelar",
+    showCancelButton: true,
+    cancelButtonColor: "#e88aa2",
+    confirmButtonText: "Continuar",
+    preConfirm: () => {
+      return {
+        password: document.getElementById("password").value,
+      };
+    },
+  });
+
+  if (formValues && formValues.password) {
+    if (formValues.password !== "conectasicov2021*") {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: `Contraseña incorrecta`,
+        confirmButtonText: "Cerrar",
+      }).then(async () => {
+        openSettings();
+      });
+    } else {
+      setSettings();
+    }
+  }
+}
+
+const setSettings = async () => {
+  let savedSicovUrl = localStorage.getItem("sicov-url");
+  let savedSyncUrl = localStorage.getItem("sync-url");
+  let savedCdaId = localStorage.getItem("id-cda");
+  const { value: formValues } = await Swal.fire({
+    title: "Ingresa la configuración.",
+    html: `
+        <div class="w-full">
+            <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="url-sicov">
+                        Url SICOV
+                    </label>
+                    <input value="${
+                      savedSicovUrl ? savedSicovUrl : ""
+                    }" required id="url-sicov" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="Url SICOV">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="sync-url">
+                        Url de sincronización
+                    </label>
+                    <input value="${
+                      savedSyncUrl ? savedSyncUrl : ""
+                    }" required id="sync-url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Url de sincronización">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="id-cda">
+                        Id del CDA
+                    </label>
+                    <input value="${
+                      savedCdaId ? savedCdaId : ""
+                    }" required id="id-cda" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Identificador del CDA">
+                </div>
+            </form>
+        </div>`,
+    focusConfirm: false,
+    cancelButtonText: "Cancelar",
+    showCancelButton: true,
+    cancelButtonColor: "#e88aa2",
+    confirmButtonText: "Guardar",
+    preConfirm: () => {
+      return {
+        urlSicov: document.getElementById("url-sicov").value,
+        syncUrl: document.getElementById("sync-url").value,
+        idCda: document.getElementById("id-cda").value,
+      };
+    },
+  });
+  if (formValues) {
+    if (formValues.idCda) {
+      localStorage.setItem("id-cda", formValues.idCda);
+    }
+    if (formValues.syncUrl) {
+      localStorage.setItem("sync-url", formValues.syncUrl);
+    }
+    if (formValues.urlSicov) {
+      localStorage.setItem("sicov-url", formValues.urlSicov);
+    }
+  }
+};
