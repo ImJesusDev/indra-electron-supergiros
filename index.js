@@ -25,10 +25,9 @@ const template = [
     label: "Opciones",
     submenu: [
       {
-        label: "Reiniciar",
+        label: "Reiniciar revisión",
         click: async () => {
-          app.relaunch();
-          app.quit();
+          win.webContents.send("reload");
         },
       },
       {

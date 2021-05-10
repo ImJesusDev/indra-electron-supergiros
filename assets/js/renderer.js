@@ -65,6 +65,9 @@ const togglePassword = (value) => {
       : sicovPassword.attr("type", "password");
   }
 };
+ipc.on("reload", (event, props) => {
+  showInitialForm();
+});
 ipc.on("info-entered", (event, props) => {
   $("#status-report").html("");
   var statusContent =
@@ -255,7 +258,8 @@ function logout() {
       $("#sicre-step").removeClass("current");
       $("#initial-step").addClass("current").removeClass("done");
       $("#sicov-password").val("");
-      sicreWebview.send("logOut", true);
+      // sicreWebview.send("logOut", true);
+      $("#sicre-webview").attr("src", savedSicovUrl);
     }
   });
 }
@@ -443,7 +447,9 @@ function showInitialForm() {
   runtWebview.send("newRequest", true);
   resetForm();
   log.info("Cerrando sesión SICOV");
-  sicreWebview.send("logOut", true);
+  // sicreWebview.send("logOut", true);
+  let savedSicovUrl = localStorage.getItem("sicov-url");
+  $("#sicre-webview").attr("src", savedSicovUrl);
   $("#initial-form").css("display", "flex");
   $("#status-report").html("");
   $("#status-report").hide();
@@ -506,7 +512,10 @@ setTimeout(async () => {
 
 ipc.on("revision-finished", (event, props) => {
   console.log("finished");
-  sicreWebview.send("logOut", true);
+  // sicreWebview.send("logOut", true);
+  let savedSicovUrl = localStorage.getItem("sicov-url");
+  $("#sicre-webview").attr("src", savedSicovUrl);
+  paynetWebview.send("logOut", true);
   $("#status-report").show();
   $("#status-report").html("");
   var statusContent = "<span>¡Formalizacion realizada!</span>";
@@ -694,8 +703,8 @@ const submitData = async (data) => {
       Blindado: data.armoredInfo.isArmored,
       NivelBlindaje: data.armoredInfo.armorLevel,
       FechaSoat: data.soat.date,
-      NumeroPoliza: data.soat.noPoliza,
-      EntidadAseguradora: data.soat.entidadExpideSoat,
+      NumeroPoliza: data.soat.poliza,
+      EntidadAseguradora: data.soat.entidad,
       TipoCarroceria: data.tipoCarroceria,
       AutoridadTransito: data.organismoTransito,
       ClasicoAntiguo: data.clasicoAntiguo,
@@ -776,8 +785,7 @@ ipc.on("vehicleData", (event, props) => {
       $("#status-report").hide();
       Swal.fire({
         title: "¡Información obtenida!",
-        text:
-          "Se ha consultado la información correctamente. ¿Desea continuar?",
+        text: "Se ha consultado la información correctamente. ¿Desea continuar?",
         icon: "success",
         html: `
                 <ul>
