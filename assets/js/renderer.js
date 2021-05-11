@@ -981,4 +981,5 @@ const setSettings = async () => {
       localStorage.setItem("sicov-url", formValues.urlSicov);
     }
   }
+  sicovInputChange();
 };

@@ -1,6 +1,6 @@
 {
     "name": "indra-supergiros",
-    "version": "1.1.10",
+    "version": "1.1.11",
     "description": "Electron project",
     "main": "index.js",
     "repository": {
