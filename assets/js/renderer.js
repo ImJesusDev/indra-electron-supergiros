@@ -514,7 +514,7 @@ ipc.on("revision-finished", (event, props) => {
   // sicreWebview.send("logOut", true);
   let savedSicovUrl = localStorage.getItem("sicov-url");
   $("#sicre-webview").attr("src", savedSicovUrl);
-  paynetWebview.send("logOut", true);
+  // paynetWebview.send("logOut", true);
   $("#status-report").show();
   $("#status-report").html("");
   var statusContent = "<span>¡Formalizacion realizada!</span>";
@@ -795,7 +795,7 @@ ipc.on("vehicleData", (event, props) => {
                     <li> Línea:${props.data.line} </li>
                     <li> Licencia:${props.data.license} </li>
                     <li> Estado del vehículo: ${props.data.state}</li>
-                    <li> Estado Soat: ${props.data.soat} </li>
+                    <li> Estado Soat: ${props.data.soat.state} </li>
                     <li> Fecha fin de vigencia Soat: ${
                       props.data.soat.date
                     } </li>
