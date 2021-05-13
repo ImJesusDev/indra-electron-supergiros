@@ -240,10 +240,12 @@ function logout() {
       let sicovUsername = localStorage.getItem("sicov-username");
       let savedSicovUrl = localStorage.getItem("sicov-url");
       let savedSyncUrl = localStorage.getItem("sync-url");
+      let savedCdaId = localStorage.getItem("id-cda");
       localStorage.clear();
       localStorage.setItem("sicov-username", sicovUsername);
       localStorage.setItem("sicov-url", savedSicovUrl);
       localStorage.setItem("sync-url", savedSyncUrl);
+      localStorage.setItem("id-cda", savedCdaId);
       $("#login-container").css("display", "flex");
       $("#form-container").hide();
       $("#progress-bar").show();
@@ -261,6 +263,7 @@ function logout() {
       $("#sicov-password").val("");
       // sicreWebview.send("logOut", true);
       $("#sicre-webview").attr("src", savedSicovUrl);
+      sicovInputChange();
     }
   });
 }
