@@ -853,10 +853,11 @@ ipc.on("vehicleData", (event, props) => {
             },
           });
           if (formValues && formValues.pin) {
+            let savedSicovUrl = localStorage.getItem("sicov-url");
             localStorage.setItem("pin-number", formValues.pin);
             $("#status-report").html("");
             var statusContent = "<span>Iniciando sesión</span>";
-
+            $("#sicre-webview").attr("src", savedSicovUrl);
             const username = localStorage.getItem("sicov-username");
             const password = localStorage.getItem("sicov-password");
             let bytes = CryptoJS.AES.decrypt(password, secretKey);
