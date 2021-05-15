@@ -70,11 +70,22 @@ function createWindow() {
   // win.removeMenu();
   win.show();
 
-  //   win.webContents.openDevTools();
+  //NIT
+  //8301081162
+  //PLACA
+  // BCD396
 
   //HKQ558
   //51914792
-  //QrH#e*Is
+  //123123123
+  //Paynet2021*
+  //ultraconcept
+  //Ultraconcept123*
+  // Extranjero: AF190CM
+  // QrH#e*Is
+
+  // SZV02E
+  // 80069756
 }
 
 app

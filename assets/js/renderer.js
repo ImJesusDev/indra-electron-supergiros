@@ -866,7 +866,11 @@ ipc.on("vehicleData", (event, props) => {
               username: username,
               password: descryptedPassword,
             };
-            sicreWebview.send("start-login", data);
+            console.log("here");
+            setTimeout(() => {
+              sicreWebview.send("start-login", data);
+            }, 1000);
+
             log.info("[SICRE] Iniciando sesión");
             $("#status-report").append(statusContent);
             $("#status-report").show();
