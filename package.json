@@ -21,6 +21,7 @@
         "electron-packager": "^15.1.0"
     },
     "dependencies": {
+        "@antiadmin/anticaptchaofficial": "^1.0.14",
         "axios": "^0.21.1",
         "crypto-js": "^4.0.0",
         "electron-log": "^4.3.2",

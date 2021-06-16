@@ -12,10 +12,88 @@ const sicreWebview = document.getElementById("sicre-webview");
 /* Crypto */
 var CryptoJS = require("crypto-js");
 const secretKey = "SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-
+const antiCaptchaApiKey = "50bb0b32a8cee2c946b633b8d4cc73aa";
+const captchaSiteKey = "6LcPh1EUAAAAAIscNcV6Ru2ZEtoUIgvUn3pCXFcV";
+let timer;
 const log = require("electron-log");
-
+/* 2 Captcha package */
+const messages = [
+  "Ingresando al RUNT",
+  "Ingresando a consulta ciudadana ",
+  "Completando formulario del RUNT",
+  "Seleccionando la opción 'No soy un robot'",
+  "Solucionando Captcha ",
+  "Ingresando a los datos del vehículo ",
+  "Consultando información de interés ",
+  "Completando información ",
+];
+let currentMessage = 0;
+const ac = require("@antiadmin/anticaptchaofficial");
+ac.setAPIKey(antiCaptchaApiKey);
+ac.getBalance()
+  .then((balance) => console.log("my balance is $" + balance))
+  .catch((error) => console.log("received error " + error));
 let currentSicreState;
+const stopTimer = () => {
+  console.log("clear timer");
+  clearInterval(timer);
+};
+/* Function to solve captcha */
+const solveCaptcha = async () => {
+  stopTimer();
+  currentMessage = 0;
+  $("#status-report").css("display", "flex");
+  $("#status-report").addClass("full");
+  $("#status-report").html("");
+  var statusContent = `<span>${messages[currentMessage]}</span>`;
+  $("#status-report").append(statusContent);
+  currentMessage++;
+  timer = setInterval(() => {
+    if (currentMessage === messages.length) {
+      stopTimer();
+      Swal.fire({
+        title: "Error en consulta, por favor intente de nuevo",
+        icon: "warning",
+        showCancelButton: false,
+        showDenyButton: false,
+        confirmButtonColor: "#79c5b4",
+        confirmButtonText: "Aceptar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          resetForm();
+          // sicreWebview.send("logOut", true);
+          $("#initial-form").css("display", "flex");
+          $("#status-report").html("");
+          $("#status-report").hide();
+          $("#progress-bar").show();
+          $("#failed-revisions").hide();
+          $("#runt-webview").hide();
+          $("#runt-step").removeClass("current");
+          $("#initial-step").addClass("current").removeClass("done");
+        }
+      });
+    } else {
+      $("#status-report").html("");
+      var statusContent = `<span>${messages[currentMessage]}</span>`;
+      $("#status-report").append(statusContent);
+      currentMessage++;
+    }
+  }, 5000);
+  log.info("Enviando solicitud captcha");
+  ac.solveRecaptchaV2Proxyless(
+    "https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo",
+    captchaSiteKey
+  )
+    .then((gresponse) => {
+      stopTimer();
+      log.info("Respuesta servicio captcha");
+      log.info(gresponse);
+      runtWebview.send("captcha-response", gresponse);
+    })
+    .catch((error) => {
+      console.log("test received error " + error);
+    });
+};
 
 /* Capture navigation events */
 sicreWebview.addEventListener("did-stop-loading", (event) => {
@@ -135,6 +213,7 @@ function goToRunt() {
   setTimeout(() => {
     $("#initial-form").hide();
     $("#runt-webview").show();
+    solveCaptcha();
     $("html,body").scrollTop(0);
     $("#initial-step").removeClass("current").addClass("done");
     $("#runt-step").addClass("current");
