@@ -210,10 +210,10 @@ function goToRunt() {
     "src",
     "https://www.runt.com.co/consultaCiudadana/#/consultaVehiculo"
   );
-  setTimeout(() => {
+  setTimeout(async () => {
     $("#initial-form").hide();
     $("#runt-webview").show();
-    solveCaptcha();
+    // solveCaptcha();
     $("html,body").scrollTop(0);
     $("#initial-step").removeClass("current").addClass("done");
     $("#runt-step").addClass("current");
@@ -242,6 +242,7 @@ function goToRunt() {
       procedencia: foreignVehicle.val(),
     };
     runtWebview.send("runt-form-data", formData);
+    await askForCaptcha();
   }, 1000);
 }
 
@@ -584,7 +585,7 @@ function showFailedRevisions() {
   $(`#${firstElement.plate}`).click();
 }
 
-const checkPaynetCredentials = async () => {};
+const checkPaynetCredentials = async () => { };
 
 setTimeout(async () => {
   // sicreWebview.openDevTools();
@@ -625,7 +626,7 @@ ipc.on("logEvent", (event, props) => {
 //     localStorage.setItem('document-number', props.documentNumber);
 // });
 
-ipc.on("paynetLogin", (event, props) => {});
+ipc.on("paynetLogin", (event, props) => { });
 
 ipc.on("pinCreated", (event, props) => {
   localStorage.setItem("pin-number", props.pin);
@@ -831,6 +832,76 @@ const submitData = async (data) => {
   });
 };
 
+const askForCaptcha = async () => {
+
+  const { value: formValues } = await Swal.fire({
+    title: "Por favor, ingresa el texto de la imagen",
+    position: 'top-end',
+    backdrop: false,
+    html: `
+                        <div class="w-full">
+                            <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2" for="captcha">
+                                        Texto
+                                    </label>
+                                    <input required id="captcha" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="pin" type="text" placeholder="Texto imagen">
+                                </div>
+                            </form>
+                        </div>`,
+    focusConfirm: false,
+    preConfirm: () => {
+      return {
+        captcha: document.getElementById("captcha").value,
+      };
+    },
+  });
+  if (formValues && formValues.captcha) {
+    runtWebview.send("imgCaptcha", formValues.captcha);
+    stopTimer();
+    currentMessage = 0;
+    $("#status-report").css("display", "flex");
+    $("#status-report").addClass("full");
+    $("#status-report").html("");
+    var statusContent = `<span>${messages[currentMessage]}</span>`;
+    $("#status-report").append(statusContent);
+    currentMessage++;
+    timer = setInterval(() => {
+      if (currentMessage === messages.length) {
+        stopTimer();
+        Swal.fire({
+          title: "Error en consulta, por favor intente de nuevo",
+          icon: "warning",
+          showCancelButton: false,
+          showDenyButton: false,
+          confirmButtonColor: "#79c5b4",
+          confirmButtonText: "Aceptar",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            resetForm();
+            // sicreWebview.send("logOut", true);
+            $("#initial-form").css("display", "flex");
+            $("#status-report").html("");
+            $("#status-report").hide();
+            $("#progress-bar").show();
+            $("#failed-revisions").hide();
+            $("#runt-webview").hide();
+            $("#runt-step").removeClass("current");
+            $("#initial-step").addClass("current").removeClass("done");
+          }
+        });
+      } else {
+        $("#status-report").html("");
+        var statusContent = `<span>${messages[currentMessage]}</span>`;
+        $("#status-report").append(statusContent);
+        currentMessage++;
+      }
+    }, 20000);
+  }
+
+
+};
+
 ipc.on("infoCompleted", (event, props) => {
   $("#status-report").html("");
   var statusContent =
@@ -878,30 +949,23 @@ ipc.on("vehicleData", (event, props) => {
                     <li> Licencia:${props.data.license} </li>
                     <li> Estado del vehículo: ${props.data.state}</li>
                     <li> Estado Soat: ${props.data.soat.state} </li>
-                    <li> Fecha fin de vigencia Soat: ${
-                      props.data.soat.date
-                    } </li>
-                    <li> Último certificado: ${
-                      props.data.certifications.type
-                    } </li>
-                    <li style="${
-                      props.data.certifications.active == "NO"
-                        ? "color:red;"
-                        : ""
-                    }" > Vigente: ${props.data.certifications.active} </li>
-                    <li> Fecha vigencia: ${
-                      props.data.certifications.expiration
-                    } </li>
+                    <li> Fecha fin de vigencia Soat: ${props.data.soat.date
+          } </li>
+                    <li> Último certificado: ${props.data.certifications.type
+          } </li>
+                    <li style="${props.data.certifications.active == "NO"
+            ? "color:red;"
+            : ""
+          }" > Vigente: ${props.data.certifications.active} </li>
+                    <li> Fecha vigencia: ${props.data.certifications.expiration
+          } </li>
                     <li> Última solicitud: ${props.data.lastRequest.type}</li>
-                    <li> Estado última solicitud: ${
-                      props.data.lastRequest.lastRequestState
-                    }</li>
-                    <li> Entidad última solicitud: ${
-                      props.data.lastRequest.lastRequestEntity
-                    }</li>
-                    <li> Fecha última solicitud: ${
-                      props.data.lastRequest.lastRequestDate
-                    }</li>
+                    <li> Estado última solicitud: ${props.data.lastRequest.lastRequestState
+          }</li>
+                    <li> Entidad última solicitud: ${props.data.lastRequest.lastRequestEntity
+          }</li>
+                    <li> Fecha última solicitud: ${props.data.lastRequest.lastRequestDate
+          }</li>
                 </ul>
                 `,
         showCancelButton: true,
@@ -1022,25 +1086,22 @@ const setSettings = async () => {
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="url-sicov">
                         Url SICOV
                     </label>
-                    <input value="${
-                      savedSicovUrl ? savedSicovUrl : ""
-                    }" required id="url-sicov" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="Url SICOV">
+                    <input value="${savedSicovUrl ? savedSicovUrl : ""
+      }" required id="url-sicov" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="Url SICOV">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="sync-url">
                         Url de sincronización
                     </label>
-                    <input value="${
-                      savedSyncUrl ? savedSyncUrl : ""
-                    }" required id="sync-url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Url de sincronización">
+                    <input value="${savedSyncUrl ? savedSyncUrl : ""
+      }" required id="sync-url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Url de sincronización">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="id-cda">
                         Id del CDA
                     </label>
-                    <input value="${
-                      savedCdaId ? savedCdaId : ""
-                    }" required id="id-cda" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Identificador del CDA">
+                    <input value="${savedCdaId ? savedCdaId : ""
+      }" required id="id-cda" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Identificador del CDA">
                 </div>
             </form>
         </div>`,
