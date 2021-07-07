@@ -1,3 +1,10 @@
+/**
+ * MAIN RENDERER PROCESS
+ *
+ * NOTE: Some unused code is intentionally left as a comment
+ * to keep as reference
+ */
+
 /* IPC */
 const { ipcRenderer: ipc } = require("electron");
 /* Alerts */
@@ -143,6 +150,7 @@ ipc.on("reload", (event, props) => {
   showInitialForm();
 });
 ipc.on("info-entered", (event, props) => {
+  $("#status-report").removeClass("full");
   $("#status-report").html("");
   var statusContent =
     '<span>Verifica la información y da clic en "Formalizar revisión"</span>';
@@ -171,6 +179,7 @@ sicreWebview.addEventListener("did-navigate", (event) => {
     console.log("here");
     currentSicreState = "login";
   } else if (event.url.indexOf("SeleccionarSucursal") >= 0) {
+    $("#status-report").removeClass("full");
     $("#status-report").html("");
     var statusContent =
       "<span>Selecciona la sucursal a la cual pertenezcas</span>";
@@ -585,7 +594,7 @@ function showFailedRevisions() {
   $(`#${firstElement.plate}`).click();
 }
 
-const checkPaynetCredentials = async () => { };
+const checkPaynetCredentials = async () => {};
 
 setTimeout(async () => {
   // sicreWebview.openDevTools();
@@ -626,7 +635,7 @@ ipc.on("logEvent", (event, props) => {
 //     localStorage.setItem('document-number', props.documentNumber);
 // });
 
-ipc.on("paynetLogin", (event, props) => { });
+ipc.on("paynetLogin", (event, props) => {});
 
 ipc.on("pinCreated", (event, props) => {
   localStorage.setItem("pin-number", props.pin);
@@ -833,10 +842,9 @@ const submitData = async (data) => {
 };
 
 const askForCaptcha = async () => {
-
   const { value: formValues } = await Swal.fire({
     title: "Por favor, ingresa el texto de la imagen",
-    position: 'top-end',
+    position: "top-end",
     backdrop: false,
     html: `
                         <div class="w-full">
@@ -898,8 +906,6 @@ const askForCaptcha = async () => {
       }
     }, 20000);
   }
-
-
 };
 
 ipc.on("infoCompleted", (event, props) => {
@@ -930,6 +936,7 @@ ipc.on("vehicleData", (event, props) => {
   }
 
   if (props.type === "done") {
+    stopTimer();
     console.log("done", props);
     submitData(props.data);
     setTimeout(async () => {
@@ -949,23 +956,30 @@ ipc.on("vehicleData", (event, props) => {
                     <li> Licencia:${props.data.license} </li>
                     <li> Estado del vehículo: ${props.data.state}</li>
                     <li> Estado Soat: ${props.data.soat.state} </li>
-                    <li> Fecha fin de vigencia Soat: ${props.data.soat.date
-          } </li>
-                    <li> Último certificado: ${props.data.certifications.type
-          } </li>
-                    <li style="${props.data.certifications.active == "NO"
-            ? "color:red;"
-            : ""
-          }" > Vigente: ${props.data.certifications.active} </li>
-                    <li> Fecha vigencia: ${props.data.certifications.expiration
-          } </li>
+                    <li> Fecha fin de vigencia Soat: ${
+                      props.data.soat.date
+                    } </li>
+                    <li> Último certificado: ${
+                      props.data.certifications.type
+                    } </li>
+                    <li style="${
+                      props.data.certifications.active == "NO"
+                        ? "color:red;"
+                        : ""
+                    }" > Vigente: ${props.data.certifications.active} </li>
+                    <li> Fecha vigencia: ${
+                      props.data.certifications.expiration
+                    } </li>
                     <li> Última solicitud: ${props.data.lastRequest.type}</li>
-                    <li> Estado última solicitud: ${props.data.lastRequest.lastRequestState
-          }</li>
-                    <li> Entidad última solicitud: ${props.data.lastRequest.lastRequestEntity
-          }</li>
-                    <li> Fecha última solicitud: ${props.data.lastRequest.lastRequestDate
-          }</li>
+                    <li> Estado última solicitud: ${
+                      props.data.lastRequest.lastRequestState
+                    }</li>
+                    <li> Entidad última solicitud: ${
+                      props.data.lastRequest.lastRequestEntity
+                    }</li>
+                    <li> Fecha última solicitud: ${
+                      props.data.lastRequest.lastRequestDate
+                    }</li>
                 </ul>
                 `,
         showCancelButton: true,
@@ -1000,7 +1014,6 @@ ipc.on("vehicleData", (event, props) => {
             localStorage.setItem("pin-number", formValues.pin);
             $("#status-report").html("");
             var statusContent = "<span>Iniciando sesión</span>";
-            $("#sicre-webview").attr("src", savedSicovUrl);
             const username = localStorage.getItem("sicov-username");
             const password = localStorage.getItem("sicov-password");
             let bytes = CryptoJS.AES.decrypt(password, secretKey);
@@ -1019,11 +1032,14 @@ ipc.on("vehicleData", (event, props) => {
             $("#status-report").show();
             $("#runt-webview").hide();
             $("#sicre-webview").show();
-            log.info("[RUNT] Recargando RUNT");
-            $("html,body").scrollTop(0);
+            setTimeout(() => {
+              $("#sicre-webview").attr("src", savedSicovUrl);
+            }, 300);
+            // log.info("[RUNT] Recargando RUNT");
+            // $("html,body").scrollTop(0);
             $("#sicre-step").addClass("current");
             $("#runt-step").removeClass("current").addClass("done");
-            runtWebview.send("newRequest", true);
+            // runtWebview.send("newRequest", true);
           }
         }
       });
@@ -1086,22 +1102,25 @@ const setSettings = async () => {
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="url-sicov">
                         Url SICOV
                     </label>
-                    <input value="${savedSicovUrl ? savedSicovUrl : ""
-      }" required id="url-sicov" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="Url SICOV">
+                    <input value="${
+                      savedSicovUrl ? savedSicovUrl : ""
+                    }" required id="url-sicov" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="Url SICOV">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="sync-url">
                         Url de sincronización
                     </label>
-                    <input value="${savedSyncUrl ? savedSyncUrl : ""
-      }" required id="sync-url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Url de sincronización">
+                    <input value="${
+                      savedSyncUrl ? savedSyncUrl : ""
+                    }" required id="sync-url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Url de sincronización">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="id-cda">
                         Id del CDA
                     </label>
-                    <input value="${savedCdaId ? savedCdaId : ""
-      }" required id="id-cda" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Identificador del CDA">
+                    <input value="${
+                      savedCdaId ? savedCdaId : ""
+                    }" required id="id-cda" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"  type="text" placeholder="Identificador del CDA">
                 </div>
             </form>
         </div>`,
