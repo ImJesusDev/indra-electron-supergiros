@@ -602,28 +602,35 @@ setTimeout(async () => {
 }, 500);
 
 ipc.on("revision-finished", (event, props) => {
-  console.log("finished");
-  // sicreWebview.send("logOut", true);
-  let savedSicovUrl = localStorage.getItem("sicov-url");
-  $("#sicre-webview").attr("src", savedSicovUrl);
-  // paynetWebview.send("logOut", true);
-  $("#status-report").show();
+  currentSicreState = "login";
   $("#status-report").html("");
-  var statusContent = "<span>¡Formalizacion realizada!</span>";
+  var statusContent = "<span>Cerrando sesión</span>";
   $("#status-report").append(statusContent);
   setTimeout(() => {
-    $("#status-report").html("");
-    $("#status-report").hide();
-  }, 3000);
-  // let url = localStorage.getItem('sicre-url');
-  // $('#sicre-webview').attr('src', url);
-  $("#runt-step").removeClass("done");
-  $("#sicre-step").removeClass("done");
-  $("#sicre-step").removeClass("current");
-  $("#initial-step").addClass("current").removeClass("done");
-  $("#sicre-webview").hide();
-  $("#initial-form").show();
-  resetForm();
+    sicreWebview.send("logOut", true);
+    setTimeout(() => {
+      let savedSicovUrl = localStorage.getItem("sicov-url");
+      // $("#sicre-webview").attr("src", savedSicovUrl);
+      // paynetWebview.send("logOut", true);
+      $("#status-report").show();
+      $("#status-report").html("");
+      var statusContent = "<span>¡Formalizacion realizada!</span>";
+      $("#status-report").append(statusContent);
+      setTimeout(() => {
+        $("#status-report").html("");
+        $("#status-report").hide();
+      }, 3000);
+      // let url = localStorage.getItem('sicre-url');
+      // $('#sicre-webview').attr('src', url);
+      $("#runt-step").removeClass("done");
+      $("#sicre-step").removeClass("done");
+      $("#sicre-step").removeClass("current");
+      $("#initial-step").addClass("current").removeClass("done");
+      $("#sicre-webview").hide();
+      $("#initial-form").show();
+      resetForm();
+    }, 4000);
+  }, 4000);
 });
 
 ipc.on("logEvent", (event, props) => {
@@ -1022,6 +1029,8 @@ ipc.on("vehicleData", (event, props) => {
               username: username,
               password: descryptedPassword,
             };
+            log.info("[SICOV] Eliminando cookies");
+            ipcRenderer.send("clear_cookies");
             console.log("here");
             setTimeout(() => {
               sicreWebview.send("start-login", data);

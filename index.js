@@ -129,3 +129,13 @@ autoUpdater.on("update-downloaded", () => {
 ipcMain.on("restart_app", () => {
   autoUpdater.quitAndInstall();
 });
+
+ipcMain.on("clear_cookies", () => {
+  console.log("On Clear Cookies");
+  session.defaultSession.clearStorageData(
+    { storages: ["cookies"] },
+    function (data) {
+      console.log("clear", data);
+    }
+  );
+});

@@ -149,8 +149,8 @@ body {
           </g>
         </svg>
         <span id="base-timer-label" class="base-timer__label">${formatTime(
-  timeLeft
-)}</span>
+          timeLeft
+        )}</span>
       </div></div>
       -->
 </div>
@@ -192,7 +192,7 @@ document.addEventListener(
         captcha: props,
       };
       await makeRuntRequest(params);
-    })
+    });
 
     window.onTimesUp = () => {
       clearInterval(timerInterval);
@@ -262,7 +262,7 @@ document.addEventListener(
 
     ipc.on("captcha-response", async (event, props) => {
       console.log("captcha response", props);
-      /* Function to call when captche is solved */
+      /* Function to call when captcha is solved */
       let params = {
         tipoDocumento: userDocumentType,
         procedencia: procedencia,
@@ -438,6 +438,7 @@ document.addEventListener(
           lastRequestState = tramite.estado;
           lastRequestEntity = tramite.entidad;
           lastRequestDate = tramite.fechaSolicitud;
+          break;
         }
       }
       return { lastRequestState, lastRequestEntity, lastRequestDate, type };
